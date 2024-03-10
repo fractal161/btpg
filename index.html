@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="assets/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="assets/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BetaTetris Playground</title>
+  </head>
+  <body>
+    <div id="app">
+      <h1>BetaTetris Playground</h1>
+      <div>created by adrien1018</div>
+      <div class="preview">
+        <!-- TODO: add config options -->
+        <canvas id="board"></canvas>
+        <!-- TODO: add menu options for current/next piece -->
+      </div>
+      <div class="card">
+        <button id="eval" type="button">Evaluate</button>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
