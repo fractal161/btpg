@@ -3,3 +3,5 @@ package-lock.json
 tsconfig.json
 vite.config.js
 assets/
+.prettierignore
+.github
