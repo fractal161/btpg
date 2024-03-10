@@ -28,12 +28,19 @@
       <h1>BetaTetris Playground</h1>
       <div>created by adrien1018</div>
       <div class="preview">
-        <!-- TODO: add config options -->
-        <canvas id="board"></canvas>
-        <!-- TODO: add menu options for current/next piece -->
-      </div>
-      <div class="card">
-        <button id="eval" type="button">Evaluate</button>
+        <canvas id="board" width="240" height="480"></canvas>
+        <div id="config">
+          <!-- actual options are added with js -->
+          <fieldset id="game-param-config">
+            <legend>Game Config</legend>
+          </fieldset>
+          <fieldset id="model-param-config">
+            <legend>Model Config</legend>
+          </fieldset>
+          <div class="card">
+            <button id="eval" type="button">Evaluate</button>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>

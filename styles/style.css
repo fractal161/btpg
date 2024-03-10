@@ -15,6 +15,7 @@
 
 * {
   min-width: 0;
+  min-height: 0;
 }
 
 body {
@@ -30,20 +31,40 @@ h1 {
   margin-bottom: 0.4em;
 }
 
+fieldset {
+  border: 1px rgba(255, 255, 255, 0.87) solid;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem 2rem;
   text-align: center;
 }
 
-#board {
-  width: 200px;
-  height: 400px;
+.card {
+  margin: 1em 0em;
 }
 
-.card {
-  padding: 2em;
+.preview {
+  margin-top: 1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1em;
+}
+
+.field {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.2em 0;
+}
+
+.field label {
+  margin-right: 0.4em;
+}
+
+#param-config {
+  display: block;
 }
 
 button {
