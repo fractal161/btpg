@@ -6,8 +6,7 @@ from torch import nn
 # from torch.distributions import Categorical
 from torch.cuda.amp import autocast
 
-kH = 20
-kW = 10
+kH, kW = 20, 10
 
 # refer to Tetris::GetState for details
 kOrd = 13
@@ -28,7 +27,7 @@ class ConvBlock(nn.Module):
     def forward(self, x):
         return self.final(self.main(x) + x)
 
-class Model(nn.Module):
+class BetaTetrisV1(nn.Module):
     def __init__(self, ch, blk):
         super().__init__()
         self.start = nn.Sequential(

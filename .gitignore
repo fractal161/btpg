@@ -26,3 +26,6 @@ dist-ssr
 # Python
 __pycache__/
 *.py[cod]
+
+# onnx export
+report_dynamo_export.sarif

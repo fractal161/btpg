@@ -5,47 +5,47 @@ leverage the ONNX Runtime to run the converted model in the browser.
 
 Source: https://pytorch.org/tutorials/beginner/onnx/export_simple_model_to_onnx_tutorial.html
 '''
+import re
 
+import numpy as np
 import torch
-from model import Model
+
+from models import BetaTetrisV1, BetaTetrisV2
+from models.v2 import obs_to_torch
 # output is rotation, y, x
 
-import torch.nn as nn
-import torch.nn.functional as F
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# V1 CODE
+model = BetaTetrisV1(192, 8)
+model.load_state_dict(torch.load('agents/betatetris-v1.pth', map_location=torch.device('cpu')))
 
-class MyModel(nn.Module):
-
-    def __init__(self):
-        super(MyModel, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 5)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
-    def forward(self, x):
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-
-model = Model(192, 8)
-model.load_state_dict(torch.load('models/betatetris.pth', map_location=torch.device('cpu')))
-
-# very relevant issue: https://github.com/pytorch/pytorch/issues/99662
+# see https://github.com/pytorch/pytorch/issues/99662
 model.eval()
 dummy_input = torch.randn(1, 14, 20, 10, device=torch.device('cpu')) # random input for onnx
-# for some reason the dynamo_export throws an error but this one doesn't
-# we will see if it actually worked correctly
 # torch.onnx.export(model, dummy_input, "test.onnx")
-
-# model = MyModel()
-# dummy_input = torch.randn(1, 1, 32, 32) # random input for onnx
-# 
 onnx_program = torch.onnx.dynamo_export(model, dummy_input)
-onnx_program.save("models/betatetris.onnx")
+onnx_program.save("agents/betatetris-v1.onnx")
+
+# V2 CODE (TODO: make this work)
+# https://github.com/adrien1018/betatetris-tablebase/blob/255027f608125a41463c79599b157c5cf2fecc26/python/fceux.py#L201
+# with torch.no_grad():
+#     state_dict = torch.load('agents/betatetris-v2-30hz-18f.pth', map_location=torch.device('cpu'))
+#     channels = state_dict['main_start.0.main.0.weight'].shape[0]
+#     start_blocks = len([0 for i in state_dict if re.fullmatch(r'main_start.*main\.0\.weight', i)])
+#     end_blocks = len([0 for i in state_dict if re.fullmatch(r'main_end.*main\.0\.weight', i)])
+#     model = BetaTetrisV2(start_blocks, end_blocks, channels).to(device)
+#     model.load_state_dict(state_dict)
+#     model.eval()
+# 
+#     # random input for onnx to use
+#     dummy_input = obs_to_torch([
+#         np.random.rand(6, 20, 10).astype('float32'),
+#         np.random.rand(28).astype('float32'),
+#         np.random.rand(14, 20, 10).astype('float32'),
+#         np.random.rand(28).astype('float32'),
+#         np.random.randint(2, size=(2,)).astype('int32')])
+#     print(dummy_input[0].dtype)
+#     model(dummy_input)
+#     onnx_program = torch.onnx.dynamo_export(model, dummy_input)
+#     onnx_program.save("agents/betatetris-v2-30hz-18f.onnx")
