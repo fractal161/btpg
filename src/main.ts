@@ -1,5 +1,6 @@
 import '../styles/style.css';
-import { Piece } from './tetris';
+import { TetrisPreview } from './preview';
+import { Piece, TetrisState } from './tetris';
 
 // intialize the config menus
 const createSelectFromNumberArray = (
@@ -131,10 +132,16 @@ const createModelConfigMenu = () => {
 createGameConfigMenu();
 createModelConfigMenu();
 
+const tetris = new TetrisState();
+
 const board = document.querySelector<HTMLCanvasElement>('#board')!;
-const boardCtx = board.getContext('2d')!;
-boardCtx.fillStyle = 'black';
-boardCtx.fillRect(0, 0, board.width, board.height);
+const preview = new TetrisPreview(board, tetris);
+preview.refresh();
+document.addEventListener('keydown', (e) => preview.keyDown(e));
+document.addEventListener('keyup', (e) => preview.keyUp(e));
+// const boardCtx = board.getContext('2d')!;
+// boardCtx.fillStyle = 'black';
+// boardCtx.fillRect(0, 0, board.width, board.height);
 
 // TODO: make this actually call the model lol
 const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;

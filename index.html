@@ -26,7 +26,7 @@
   <body>
     <div id="app">
       <h1>BetaTetris Playground</h1>
-      <div>created by adrien1018</div>
+      <div>created by adrien1018 and fractal161</div>
       <div class="preview">
         <canvas id="board" width="240" height="480"></canvas>
         <div id="config">
@@ -42,6 +42,44 @@
           </div>
         </div>
       </div>
+      <h2>About</h2>
+      <p class="text">
+        BetaTetris, created by Adrien Wu, is an artificial intelligence trained
+        to play NES Tetris. It has achieved several milestones, like winning the
+        first
+        <a href="https://www.twitch.tv/videos/1074130132"
+          >Classic Tetris AI Exhibition</a
+        >, reaching the game crash under
+        <a href="https://www.youtube.com/watch?v=opg3qyBMRis"
+          >very harsh conditions</a
+        >, and becoming the first agent to reach the
+        <a href="https://www.youtube.com/watch?v=yBOfsnBQ5i0">rebirth screen</a>
+        on an unmodified version of the game. Many of these accomplishments
+        required custom fine tuning, meaning BetaTetris isn't technically just
+        one AI, but rather a collection of agents that each excel at a specific
+        task. Here, you can BetaTetris to analyze any position with a number of
+        parameters, allowing you to learn by example from a world class Tetris
+        player.
+      </p>
+      <h2>Related</h2>
+      <p class="text">Check out these other cool sites!</p>
+      <p class="text">
+        <b>
+          <a href="https://gregorycannon.github.io/TetrisTrainer/"
+            >TetrisTrainer</a
+          > </b
+        >: A NES Tetris simulator developed by
+        <a href="https://github.com/GregoryCannon/">Greg Cannon</a> that
+        supports analysis from StackRabbit, a powerful heuristic-based AI that
+        leverages Monte Carlo Tree Search.
+      </p>
+      <p class="text">
+        <b><a href="https://www.tetrisfish.com/">TetrisFish</a></b
+        >: A live analysis tool with support for saving and viewing replays
+        developed by <a href="https://github.com/AnselChang/">Ansel Chang</a>.
+        It's also powered by StackRabbit, but may support BetaTetris analysis in
+        the future.
+      </p>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
