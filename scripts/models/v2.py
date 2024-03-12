@@ -34,6 +34,8 @@ class ConvBlock(nn.Module):
                 nn.BatchNorm2d(ch),
                 )
         self.final = nn.ReLU(True)
+
+    @autocast(device_type=device)
     def forward(self, x):
         return self.final(self.main(x) + x)
 
@@ -53,7 +55,7 @@ class InitialEmbed(nn.Module):
     @autocast(device_type=device)
     def forward(self, obs, meta):
         x_meta = self.meta(meta)
-        x = self.embed_1(obs) + self.embed_2(obs) + self.embed_3(obs) + x_meta.view(*x_meta.shape, 1, 1)
+        x = self.embed_1(obs) + self.embed_2(obs) + self.embed_3(obs) + x_meta.view(*x_meta.size(), 1, 1)
         return self.finish(x)
 
 
@@ -88,7 +90,8 @@ class PiValueHead(nn.Module):
     @autocast(device_type=device, enabled=False)
     def forward(self, pi, value, invalid):
         pi = pi.float()
-        pi[invalid] = -float('inf')
+        pi -= (invalid * 2) * torch.finfo(torch.float32).max
+        # pi[invalid] = -float('inf')
         v = self.linear(value.float())
         return pi, v.transpose(0, 1)
 
@@ -127,7 +130,7 @@ class BetaTetrisV2(nn.Module):
 
     @autocast(device_type=device)
     def evdev_coeff(self, board, board_meta):
-        batch = board.shape[0]
+        batch = board.size(0)
         x = self.board_embed(board, board_meta)
         x = self.main_start(x)
         x = self.evdev_head(x)
@@ -136,7 +139,7 @@ class BetaTetrisV2(nn.Module):
     @autocast(device_type=device)
     def forward(self, obs, categorical=False, pi_only=False, evdev_only=False):
         board, board_meta, moves, moves_meta, meta_int = obs
-        batch = board.shape[0]
+        batch = board.size(0)
         pi = None
         v = torch.zeros((1, batch), dtype=torch.float32, device=board.device)
         evdev = torch.zeros((2, batch), dtype=torch.float32, device=board.device)
@@ -144,15 +147,16 @@ class BetaTetrisV2(nn.Module):
         invalid = moves[:,2:6].view(batch, -1) == 0
         x = self.board_embed(board, board_meta)
         x = self.main_start(x)
-        if not pi_only:
-            evdev = self.evdev_final(self.evdev_head(x), meta_int[:,0].type(torch.LongTensor))
-        if not evdev_only:
-            x = x + self.moves_embed(moves, moves_meta)
-            x = self.main_end(x)
-            pi, v = self.pi_value_final(
-                    self.pi_logits_head(x),
-                    self.value_head(x),
-                    invalid)
+        with autocast(device_type=device):
+            if not pi_only:
+                evdev = self.evdev_final(self.evdev_head(x), meta_int[:,0].type(torch.LongTensor))
+            if not evdev_only:
+                x = x + self.moves_embed(moves, moves_meta)
+                x = self.main_end(x)
+                pi, v = self.pi_value_final(
+                        self.pi_logits_head(x),
+                        self.value_head(x),
+                        invalid)
             # if categorical: pi = Categorical(logits=pi)
         return pi, torch.concat([v, evdev])
 
