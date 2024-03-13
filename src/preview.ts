@@ -22,6 +22,8 @@ export class TetrisPreview {
         this.canvas.addEventListener('mouseleave', this.mouseLeave.bind(this));
 
         this.canvas.addEventListener('keydown', this.keyDown.bind(this));
+        document.addEventListener('keydown', this.keyDown.bind(this));
+        document.addEventListener('keyup', this.keyUp.bind(this));
     }
 
     private clear(): void {

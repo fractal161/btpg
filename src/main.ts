@@ -1,4 +1,5 @@
 import '../styles/style.css';
+import { ExampleModel } from './models/example-model';
 import { TetrisPreview } from './preview';
 import { Piece, TetrisState } from './tetris';
 
@@ -21,7 +22,7 @@ const createSelectFromNumberArray = (
 
 const createSelectFromList = (
     id: string,
-    values: Array<[string, string]>,
+    values: Array<Array<string>>,
 ): HTMLSelectElement => {
     const select = document.createElement('select');
     select.id = id;
@@ -48,6 +49,8 @@ const wrapSelectInField = (
     return div;
 };
 
+// TODO: right now we assume all models have the same config, but in general
+// this might not be true
 const createGameConfigMenu = () => {
     const currentSelect = createSelectFromList(
         'current-piece-select',
@@ -101,14 +104,14 @@ const createModelConfigMenu = () => {
 
     const AGGRESSION_LEVELS = [2000, 360, 100];
     const aggroNames = ['Low', 'Medium', 'High'];
-    const aggroOptions: Array<[string, string]> = aggroNames.map((elem, i) => [
+    const aggroOptions = aggroNames.map((elem, i) => [
         AGGRESSION_LEVELS[i].toString(),
         elem,
     ]);
     const aggroSelect = createSelectFromList('aggro-select', aggroOptions);
     const aggroField = wrapSelectInField(aggroSelect, 'Aggression:');
 
-    const droughtOptions: Array<[string, string]> = [
+    const droughtOptions: Array<Array<string>> = [
         ['yes', 'Yes'],
         ['no', 'No'],
     ];
@@ -137,12 +140,23 @@ const tetris = new TetrisState();
 const board = document.querySelector<HTMLCanvasElement>('#board')!;
 const preview = new TetrisPreview(board, tetris);
 preview.refresh();
-document.addEventListener('keydown', (e) => preview.keyDown(e));
-document.addEventListener('keyup', (e) => preview.keyUp(e));
-// const boardCtx = board.getContext('2d')!;
-// boardCtx.fillStyle = 'black';
-// boardCtx.fillRect(0, 0, board.width, board.height);
+
+const model = new ExampleModel();
 
 // TODO: make this actually call the model lol
 const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;
-evalButton.addEventListener('click', () => console.log('eval!'));
+evalButton.addEventListener('click', async () => {
+    try {
+        await model.run();
+    } catch (e) {
+        console.error(e);
+    }
+});
+
+// global event listeners
+
+const keyDown = (e: KeyboardEvent) => {
+    preview.keyDown(e);
+};
+
+document.addEventListener('keydown', keyDown);

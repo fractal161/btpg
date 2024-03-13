@@ -50,3 +50,9 @@ export class TetrisState {
         }
     }
 }
+
+export interface Placement {
+    x: number;
+    y: number;
+    rot: number;
+}

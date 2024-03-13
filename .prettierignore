@@ -1,7 +1,6 @@
 package.json
 package-lock.json
 tsconfig.json
-vite.config.js
 assets/
 agents/
 scripts/
