@@ -141,7 +141,10 @@ const board = document.querySelector<HTMLCanvasElement>('#board')!;
 const preview = new TetrisPreview(board, tetris);
 preview.refresh();
 
-const model = new ExampleModel();
+// TODO: disable button until model is fully loaded
+// also indicate that the model is being loaded lmao
+
+const model = await ExampleModel.create();
 
 // TODO: make this actually call the model lol
 const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;
