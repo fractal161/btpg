@@ -5,7 +5,7 @@
 // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
 
 import { InferenceSession, Tensor, env } from 'onnxruntime-web';
-import onnxFile from '../../agents/betatetris-v1.onnx';
+import onnxFile from '../../agents/example.onnx';
 import { Model } from '../model';
 import { Placement } from '../tetris';
 

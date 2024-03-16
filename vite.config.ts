@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
+// https://github.com/mycelial/mycelial-js/issues/25#issuecomment-1533305723
 export default defineConfig({
   assetsInclude: ['**/*.onnx'],
   base: '/btpg',
@@ -18,6 +19,10 @@ export default defineConfig({
       targets: [
         {
           src: 'node_modules/onnxruntime-web/dist/*.wasm',
+          dest: '',
+        },
+        {
+          src: 'wasm/*.wasm',
           dest: '',
         },
       ],
