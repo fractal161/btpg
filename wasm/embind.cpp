@@ -102,7 +102,7 @@ EMSCRIPTEN_BINDINGS(tetris) {
     ;
 
   class_<Tetris>("Tetris")
-    .constructor<uint64_t>()
+    .constructor<unsigned int>()
     //.property("x", &MyClass::x)
     //.property("x", &MyClass::getX, &MyClass::setX)
     //.property("x_readonly", &MyClass::getX)
