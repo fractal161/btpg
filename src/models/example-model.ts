@@ -4,7 +4,7 @@
 // see also advanced usage of importing ONNX Runtime Web:
 // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
 
-import { InferenceSession, Tensor, env } from 'onnxruntime-web';
+import { InferenceSession, Tensor } from 'onnxruntime-web';
 import onnxFile from '../../agents/example.onnx';
 import { Model } from '../model';
 import { Placement } from '../tetris';
@@ -13,7 +13,6 @@ export class ExampleModel implements Model {
     private constructor(private session: InferenceSession) {}
 
     public static create = async (): Promise<ExampleModel> => {
-        env.wasm.wasmPaths = 'btpg/';
         const session = await InferenceSession.create(onnxFile);
         return new ExampleModel(session);
     };

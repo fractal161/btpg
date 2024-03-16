@@ -4,7 +4,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 // https://github.com/mycelial/mycelial-js/issues/25#issuecomment-1533305723
 export default defineConfig({
   assetsInclude: ['**/*.onnx'],
-  base: '/btpg',
+  base: '/btpg/',
   build: {
     rollupOptions: {
       output: {
