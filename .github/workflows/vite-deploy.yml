@@ -37,8 +37,10 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+      - name: Install emcc
+        uses: mymindstorm/setup-emsdk@v14
       - name: Build
-        run: npm run build
+        run: cd wasm && ./build.sh && cd .. && npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
