@@ -29,3 +29,5 @@ __pycache__/
 
 # onnx export
 report_dynamo_export.sarif
+
+emsdk/

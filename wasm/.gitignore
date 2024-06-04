@@ -1,3 +1,4 @@
-tetris.js
-tetris.wasm
-tetris.d.ts
+*.js
+*.wasm
+*.d.ts
+tetris.html
