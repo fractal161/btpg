@@ -54,3 +54,7 @@ struct MultiState {
 MultiState GetState(
     const ByteBoard& byte_board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_frame);
+
+MultiState GetStateAllNextPieces(
+    const ByteBoard& byte_board, int now_piece, const Position& premove,
+    int lines, TapSpeed tap_speed, int adj_frame);

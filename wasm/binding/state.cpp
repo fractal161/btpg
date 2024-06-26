@@ -76,3 +76,20 @@ MultiState GetState(
   ret.from_state(std::move(state));
   return ret;
 }
+
+MultiState GetStateAllNextPieces(
+    const ByteBoard& byte_board, int now_piece, const Position& premove,
+    int lines, TapSpeed tap_speed, int adj_frame) {
+  MultiState ret = GetState(byte_board, now_piece, 0, premove, lines, tap_speed, adj_frame);
+  ret.resize(7);
+  for (int i = 1; i < 7; i++) {
+    memcpy(ret.board[i].data(), ret.board[0].data(), sizeof(State::board));
+    memcpy(ret.meta[i].data(), ret.meta[0].data(), sizeof(State::meta));
+    memcpy(ret.moves[i].data(), ret.moves[0].data(), sizeof(State::moves));
+    memcpy(ret.move_meta[i].data(), ret.move_meta[0].data(), sizeof(State::move_meta));
+    memcpy(ret.meta_int[i].data(), ret.meta_int[0].data(), sizeof(State::meta_int));
+    ret.meta[i][12] = 0;
+    ret.meta[i][12 + i] = 1;
+  }
+  return ret;
+}

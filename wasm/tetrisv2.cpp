@@ -15,21 +15,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
   //DeclareArray<decltype(State::move_meta)>("State_move_meta");
   DeclareArray<decltype(State::meta_int)>("State_meta_int");
 
-/*
-  emscripten::register_vector<decltype(State::board)>("MultiState_board");
-  emscripten::register_vector<decltype(State::moves)>("MultiState_moves");
-  emscripten::register_vector<decltype(State::meta)>("MultiState_meta");
-  //emscripten::register_vector<decltype(State::move_meta)>("MultiState_move_meta");
-  emscripten::register_vector<decltype(State::meta_int)>("MultiState_meta_int");
-*/
-
-  emscripten::value_object<State>("State")
-      .field("board", &State::board)
-      .field("moves", &State::moves)
-      .field("meta", &State::meta)
-      .field("move_meta", &State::move_meta)
-      .field("meta_int", &State::meta_int)
-      ;
+  // std::vector<*> is automatically bound as JS list in emarray.h
 
   emscripten::value_object<MultiState>("MultiState")
       .field("board", &MultiState::board)
@@ -53,4 +39,5 @@ EMSCRIPTEN_BINDINGS(my_module) {
       ;
 
   emscripten::function("GetState", &GetState);
+  emscripten::function("GetStateAllNextPieces", &GetStateAllNextPieces);
 }
