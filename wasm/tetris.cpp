@@ -12,7 +12,9 @@ EMSCRIPTEN_BINDINGS(my_module) {
   DeclareArray<decltype(State::board)::value_type::value_type>("State_board_value_value");
   DeclareArray<decltype(State::moves)>("State_moves");
   DeclareArray<decltype(State::meta)>("State_meta");
-  //DeclareArray<decltype(State::move_meta)>("State_move_meta");
+  if constexpr (decltype(State::move_meta)().size() != decltype(State::meta)().size()) {
+    DeclareArray<decltype(State::move_meta)>("State_move_meta");
+  }
   DeclareArray<decltype(State::meta_int)>("State_meta_int");
 
   // std::vector<*> is automatically bound as JS list in emarray.h

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include "hash.h"
 
 struct Position {
   static constexpr bool kIsConstSize = true;
@@ -30,3 +31,14 @@ struct Position {
 inline constexpr Position Position::Start = Position(0, 0, 5);
 // all pieces has cell to the left when r=0
 inline constexpr Position Position::Invalid = Position(0, 0, 0);
+
+namespace std {
+
+template<>
+struct hash<Position> {
+  constexpr size_t operator()(const Position& p) const {
+    return Hash(p.r, p.x*16+p.y);
+  }
+};
+
+} // namespace std
