@@ -181,6 +181,24 @@ class alignas(32) Board {
     unreachable();
   }
 
+  constexpr uint32_t Row(int r) const {
+    constexpr uint64_t kRowMask = 0x100000400001;
+    return pext(b1 >> r, kRowMask) | pext(b2 >> r, kRowMask) << 3 |
+        pext(b3 >> r, kRowMask) << 6 | pext(b4 >> r, kRowMask) << 9;
+  }
+
+  constexpr std::array<uint32_t, 10> Columns() const {
+    std::array<uint32_t, 10> arr;
+    for (int i = 0; i < 10; i++) arr[i] = Column(i);
+    return arr;
+  }
+
+  constexpr std::array<uint32_t, 20> Rows() const {
+    std::array<uint32_t, 20> arr;
+    for (int i = 0; i < 20; i++) arr[i] = Row(i);
+    return arr;
+  }
+
   constexpr bool Cell(int x, int y) const {
     return Column(y) >> x & 1;
   }
@@ -411,6 +429,32 @@ class alignas(32) Board {
     unreachable();
   }
 
+  template <int piece> constexpr Board PieceMapNoro() const {
+    if constexpr (piece == 0) return TMap()[0];
+    if constexpr (piece == 1) return JMap()[0];
+    if constexpr (piece == 2) return ZMap()[0];
+    if constexpr (piece == 3) return OMap()[0];
+    if constexpr (piece == 4) return SMap()[0];
+    if constexpr (piece == 5) return LMap()[0];
+    if constexpr (piece == 6) return IMap()[0];
+    unreachable();
+  }
+
+  constexpr Board PieceMapNoro(int piece) const {
+    switch (piece) {
+#define ONECASE(x) case x: return PieceMapNoro<x>();
+      ONECASE(0)
+      ONECASE(1)
+      ONECASE(2)
+      ONECASE(3)
+      ONECASE(4)
+      ONECASE(5)
+      ONECASE(6)
+#undef ONECASE
+    }
+    unreachable();
+  }
+
   constexpr Board PlaceT(int r, int x, int y) const {
     switch (r) {
       case 0: return Place3Wide_(kTPiece0_, x, y, 0, 1);
@@ -474,6 +518,14 @@ class alignas(32) Board {
       case 6: return PlaceI(r, x, y);
     }
     unreachable();
+  }
+
+  constexpr int Height() const {
+    uint32_t col_and = (
+        b1 & b2 & b3 & b4 &
+        b1 >> 22 & b2 >> 22 & b3 >> 22 &
+        b1 >> 44 & b2 >> 44 & b3 >> 44);
+    return 20 - ctz(~col_and);
   }
 
   constexpr bool operator==(const Board& x) const = default;
