@@ -4,11 +4,14 @@
 // see also advanced usage of importing ONNX Runtime Web:
 // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
 
-import { InferenceSession, Tensor } from 'onnxruntime-web';
+import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
 import onnxFile from '../../agents/model.onnx';
 import { Model } from '../model';
 import { Placement } from '../tetris';
 import Module from '../../wasm/tetris.js';
+
+env.wasm.wasmPaths = '/btpg/';
+const module = await Module();
 
 function calculateShape(nestedArray: Array<any>) {
     const shape = [];
@@ -27,16 +30,24 @@ function createONNXTensor(nestedArray: Array<any>, dataType = 'float32') {
     return new Tensor(dataType as any, flattenedArray, shape);
 }
 
-function argmax(a) {
-    return a.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
-}
-
 export class ExampleModel implements Model {
     private constructor(private session: InferenceSession) {}
 
     public static create = async (): Promise<ExampleModel> => {
-        const session = await InferenceSession.create(onnxFile);
-        return new ExampleModel(session);
+        try {
+            const session = await InferenceSession.create(onnxFile, {executionProviders: ['webgpu']});
+            return new ExampleModel(session);
+        } catch (e) {
+            // TODO: change to display a message in the UI
+            console.info('WebGPU not supported; falling back to WebAssembly');
+        }
+        try {
+            const session = await InferenceSession.create(onnxFile, {executionProviders: ['wasm']});
+            return new ExampleModel(session);
+        } catch (e) {
+            console.error('Cannot initialize model');
+            throw e;
+        }
     };
 
     public run = async (): Promise<Placement> => {
@@ -44,8 +55,8 @@ export class ExampleModel implements Model {
             throw Error("session isn't ready!");
         }
 
-        const module = await Module();
         const board = Array.from({length:20}, () => Array(10).fill(1));
+        console.log(board);
         const state = module.GetState(
             board,
             0,
@@ -57,25 +68,23 @@ export class ExampleModel implements Model {
             0);
 
         // prepare feeds. use model input names as keys.
-        console.log(state.moves);
         const feeds = {
-            [this.session.inputNames[0]]: createONNXTensor(state.board),
-            [this.session.inputNames[1]]: createONNXTensor(state.meta),
-            [this.session.inputNames[2]]: createONNXTensor(state.moves),
-            [this.session.inputNames[3]]: createONNXTensor(state.move_meta),
-            [this.session.inputNames[4]]: createONNXTensor(state.meta_int, 'int32'),
+            board: createONNXTensor(state.board),
+            meta: createONNXTensor(state.meta),
+            moves: createONNXTensor(state.moves),
+            move_meta: createONNXTensor(state.move_meta),
+            meta_int: createONNXTensor(state.meta_int, 'int32'),
         };
         console.log(feeds);
 
         // feed inputs and run
         const results = await this.session.run(feeds);
-        const pi = results[this.session.outputNames[0]].data;
-        const v = results[this.session.outputNames[1]].data;
-        const best = argmax(pi);
-        console.log(best, v);
+        const pi = results.pi.data;
+        const pi_rank = results.pi_rank.data;
+        const v = results.v.data;
+        console.log(pi, pi_rank, v);
+        const best = Number(pi_rank[0]);
 
-        // step 1: create typed arrays for the input
-        // step 2: create tensors
         return { rot: ~~(best / 200), x: ~~(best / 10) % 20, y: best % 10 };
     };
 }
