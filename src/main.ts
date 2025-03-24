@@ -6,6 +6,11 @@ import { Piece, TetrisState } from './tetris';
 const main = async () => {
     // @ts-ignore
 
+    const state = new TetrisState();
+
+    const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
+    const preview = new TetrisPreview(board, state);
+
     // intialize the config menus
     const createSelectFromNumberArray = (
         id: string,
@@ -38,8 +43,23 @@ const main = async () => {
         return select;
     };
 
+    const createNumberSelector = (
+        id: string,
+        min: number,
+        max: number,
+        step: number = 1,
+    ): HTMLInputElement => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = id;
+        input.min = min.toString();
+        input.max = max.toString();
+        input.step = step.toString();
+        return input;
+    }
+
     const wrapSelectInField = (
-        select: HTMLSelectElement,
+        select: HTMLSelectElement | HTMLInputElement,
         labelText: string,
     ): HTMLDivElement => {
         const label = document.createElement('label');
@@ -62,47 +82,81 @@ const main = async () => {
         currentSelect.selectedIndex = Math.floor(Math.random() * 7);
         const currentField = wrapSelectInField(currentSelect, 'Current piece:');
 
-        const nextSelect = createSelectFromList(
-            'current-piece-select',
-            Object.entries(Piece),
-        );
-        nextSelect.selectedIndex = Math.floor(Math.random() * 7);
-        const nextField = wrapSelectInField(nextSelect, 'Next piece:');
-
         // TODO: betatetris uses the current line count as a factor in making
         // decisions. this is hidden from the user for simplicity, but it might
         // be good to support this functionality later
         // TODO: maybe this belongs in the game state menu??
-        const LEVELS = [18, 19, 29];
+        const LEVELS = [18, 19, 29, 39];
         const lvlSelect = createSelectFromNumberArray(
             'lvl-select',
             LEVELS,
             (lvl) => lvl.toString(),
         );
-        const lvlField = wrapSelectInField(lvlSelect, 'Level:');
+        const lvlField = wrapSelectInField(lvlSelect, 'Level speed:');
+
+        const linesInput = createNumberSelector('lines-input', 0, 429, 2);
+        const linesField = wrapSelectInField(linesInput, 'Lines:');
+        linesInput.value = '32';
 
         const gameConfig =
             document.querySelector<HTMLDivElement>('#game-param-config')!;
         gameConfig.appendChild(currentField);
-        gameConfig.appendChild(nextField);
         gameConfig.appendChild(lvlField);
+        gameConfig.appendChild(linesField);
+
+        const levelChange = (e: Event) => {
+            const target = e.target as HTMLSelectElement;
+            const level = parseInt(target.value);
+            if (level == 18) {
+                linesInput.value = '30';
+                preview.setLevel(18);
+            } else if (level == 19) {
+                linesInput.value = '160';
+                preview.setLevel(22);
+            } else if (level == 29) {
+                linesInput.value = '260';
+                preview.setLevel(32);
+            } else if (level == 39) {
+                linesInput.value = '360';
+                preview.setLevel(42);
+            }
+        }
+        lvlSelect.addEventListener('change', levelChange);
+
+        const lineChange = (e: Event) => {  
+            const target = e.target as HTMLInputElement;
+            const value = parseInt(target.value);
+            let level = 19 + ~~((value - 130) / 10);
+            if (value < 130) {
+                lvlSelect.selectedIndex = 0;
+                level = 18;
+            } else if (value < 230) {
+                lvlSelect.selectedIndex = 1;
+            } else if (value < 330) {
+                lvlSelect.selectedIndex = 2;
+            } else {
+                lvlSelect.selectedIndex = 3;
+            }
+            preview.setLevel(level);
+        }
+        linesInput.addEventListener('input', lineChange);
     };
 
     const createModelConfigMenu = () => {
-        const HZ_VALUES = [12, 13.5, 15, 20, 30];
-        const hzSelect = createSelectFromNumberArray(
+        const HZ_VALUES = ['10', '12', '15', '20', '24', '30', 'slow5'];
+        const HZ_NAMES = [ '10hz', '12hz', '15hz', '20hz', '24hz', '30hz', 'slow 5 tap'];
+        const hzSelect = createSelectFromList(
             'hz-select',
-            HZ_VALUES,
-            (hz) => hz.toString() + 'hz',
+            HZ_VALUES.map((elem, i) => [elem, HZ_NAMES[i]]),
         );
         hzSelect.selectedIndex = 4;
-        const hzField = wrapSelectInField(hzSelect, 'Speed:');
+        const hzField = wrapSelectInField(hzSelect, 'Tap speed:');
 
-        const REACTION_TIMES = [8, 16, 21, 25, 61];
+        const REACTION_TIMES = [0, 18, 21, 24, 30, 61];
         const reactionSelect = createSelectFromNumberArray(
             'reaction-select',
             REACTION_TIMES,
-            (delay) => Math.round((delay * 1000) / 60).toString() + 'ms',
+            (delay) => delay == 61 ? 'No adj' : Math.round((delay * 1000) / 60).toString() + 'ms (' + delay + 'f)',
         );
         reactionSelect.selectedIndex = 2;
         const reactionField = wrapSelectInField(
@@ -110,7 +164,7 @@ const main = async () => {
             'Reaction time:',
         );
 
-        const AGGRESSION_LEVELS = [2000, 360, 100];
+        const AGGRESSION_LEVELS = [0, 1, 2];
         const aggroNames = ['Low', 'Medium', 'High'];
         const aggroOptions = aggroNames.map((elem, i) => [
             AGGRESSION_LEVELS[i].toString(),
@@ -119,17 +173,6 @@ const main = async () => {
         const aggroSelect = createSelectFromList('aggro-select', aggroOptions);
         const aggroField = wrapSelectInField(aggroSelect, 'Aggression:');
 
-        const droughtOptions: Array<Array<string>> = [
-            ['yes', 'Yes'],
-            ['no', 'No'],
-        ];
-        const droughtSelect = createSelectFromList(
-            'drought-select',
-            droughtOptions,
-        );
-        droughtSelect.selectedIndex = 1;
-        const droughtField = wrapSelectInField(droughtSelect, 'Drought mode?');
-
         // add everything to the menu
         const modelConfig = document.querySelector<HTMLDivElement>(
             '#model-param-config',
@@ -137,16 +180,10 @@ const main = async () => {
         modelConfig.appendChild(hzField);
         modelConfig.appendChild(reactionField);
         modelConfig.appendChild(aggroField);
-        modelConfig.appendChild(droughtField);
     };
 
     createGameConfigMenu();
     createModelConfigMenu();
-
-    const state = new TetrisState();
-
-    const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
-    const preview = new TetrisPreview(board, state);
 
     // TODO: disable button until model is fully loaded
     // also indicate that the model is being loaded lmao

@@ -5,9 +5,10 @@ export class TetrisPreview {
     private drawing: boolean = false;
     private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
+    private board: HTMLTableElement;
 
     constructor(
-        private wrapper: HTMLDivElement,
+        wrapper: HTMLDivElement,
         private tetris: TetrisState,
     ) {
         const createCell = (x: number, y: number) => {
@@ -50,6 +51,7 @@ export class TetrisPreview {
             return columnMarks;
         }
         const board = document.createElement('table');
+        this.board = board;
         board.classList.add('board');
         board.classList.add('level-8');
         for (let i = 0; i < BOARD_HEIGHT; i++) {
@@ -58,7 +60,7 @@ export class TetrisPreview {
             board.appendChild(row);
         }
         board.appendChild(createColumnMarks());
-        this.wrapper.appendChild(board);
+        wrapper.appendChild(board);
 
         board.addEventListener('mousedown', this.mouseDown.bind(this));
         board.addEventListener('mouseup', this.mouseUp.bind(this));
@@ -166,7 +168,7 @@ export class TetrisPreview {
     }
 
     private resetHover(): void {
-        this.wrapper.querySelectorAll('.hover').forEach((elem) => {
+        this.board.querySelectorAll('.hover').forEach((elem) => {
             elem.classList.remove('hover');
         });
         if (this.cursor && !this.drawing && this.drawMode === 'column') {
@@ -190,5 +192,10 @@ export class TetrisPreview {
             this.drawMode = 'cell';
         }
         this.resetHover();
+    }
+
+    public setLevel(level: number) {
+        const levelClass = level % 10;
+        this.board.classList = 'board level-' + levelClass;
     }
 }
