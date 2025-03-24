@@ -2,12 +2,9 @@ import '../styles/style.css';
 import { ExampleModel } from './models/example-model';
 import { TetrisPreview } from './preview';
 import { Piece, TetrisState } from './tetris';
-import Module from '../wasm/tetris.js';
 
 const main = async () => {
     // @ts-ignore
-    const module = await Module();
-    console.log(new module.Tetris(18));
 
     // intialize the config menus
     const createSelectFromNumberArray = (
@@ -148,9 +145,8 @@ const main = async () => {
 
     const state = new TetrisState();
 
-    const board = document.querySelector<HTMLCanvasElement>('#board')!;
+    const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
     const preview = new TetrisPreview(board, state);
-    preview.refresh();
 
     // TODO: disable button until model is fully loaded
     // also indicate that the model is being loaded lmao
@@ -161,7 +157,8 @@ const main = async () => {
     const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;
     evalButton.addEventListener('click', async () => {
         try {
-            await model.run();
+            const result = await model.run();
+            console.log(result);
         } catch (e) {
             console.error(e);
         }

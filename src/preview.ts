@@ -1,131 +1,99 @@
 import { BOARD_HEIGHT, BOARD_WIDTH, TetrisState } from './tetris';
 
 export class TetrisPreview {
-    private ctx: CanvasRenderingContext2D;
-    public drawMode: 'cell' | 'erase' | 'column';
+    public drawMode: 'cell' | 'erase' | 'column' = 'cell';
     private drawing: boolean = false;
+    private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
 
     constructor(
-        private canvas: HTMLCanvasElement,
+        private wrapper: HTMLDivElement,
         private tetris: TetrisState,
     ) {
-        this.drawMode = 'cell';
-        this.ctx = canvas.getContext('2d')!;
+        const createCell = (x: number, y: number) => {
+            const cell = document.createElement('td');
+            cell.classList.add('cell');
+            cell.setAttribute('data-x', x.toString());
+            cell.setAttribute('data-y', y.toString());
+            const block = document.createElement('div');
+            block.classList.add('block');
+            cell.appendChild(block);
+            return cell;
+        };
+        const createRow = (x: number): [HTMLTableRowElement, HTMLTableCellElement[]] => {
+            const row = document.createElement('tr');
+            row.classList.add('row');
+            const rowMark = document.createElement('td');
+            rowMark.classList.add('row-mark');
+            rowMark.innerText = (BOARD_HEIGHT - x).toString();
+            row.appendChild(rowMark);
+            const cells: HTMLTableCellElement[] = [];
+            for (let y = 0; y < BOARD_WIDTH; y++) {
+                const cell = createCell(x, y);
+                cells.push(cell);
+                row.appendChild(cell);
+            }
+            return [row, cells];
+        };
+        const createColumnMarks = () => {
+            const columnMarks = document.createElement('tr');
+            columnMarks.classList.add('row-column-marks');
+            columnMarks.appendChild(document.createElement('td'));
+            for (let i = 0; i < BOARD_WIDTH; i++) {
+                const columnMark = document.createElement('td');
+                columnMark.classList.add('column-mark');
+                columnMark.setAttribute('data-x', BOARD_HEIGHT.toString());
+                columnMark.setAttribute('data-y', i.toString());
+                columnMark.innerText = ((i + 1) % 10).toString();
+                columnMarks.appendChild(columnMark);
+            }
+            return columnMarks;
+        }
+        const board = document.createElement('table');
+        board.classList.add('board');
+        board.classList.add('level-8');
+        for (let i = 0; i < BOARD_HEIGHT; i++) {
+            const [row, cells] = createRow(i);
+            this.cells.push(cells);
+            board.appendChild(row);
+        }
+        board.appendChild(createColumnMarks());
+        this.wrapper.appendChild(board);
 
-        // listeners for manipulating canvas state
-        // TODO: this can be greatly improved to handle cases where the mouse
-        // leaves/enters the board but it's good enough for now
-        this.canvas.addEventListener('mousedown', this.mouseDown.bind(this));
-        this.canvas.addEventListener('mouseup', this.mouseUp.bind(this));
-        this.canvas.addEventListener('mousemove', this.mouseMove.bind(this));
-        this.canvas.addEventListener('mouseleave', this.mouseLeave.bind(this));
-
-        this.canvas.addEventListener('keydown', this.keyDown.bind(this));
+        board.addEventListener('mousedown', this.mouseDown.bind(this));
+        board.addEventListener('mouseup', this.mouseUp.bind(this));
+        board.addEventListener('mouseleave', this.mouseLeave.bind(this));
+        for (let i of board.querySelectorAll('td')) {
+            i.addEventListener('mousemove', this.mouseMove.bind(this));
+        }
         document.addEventListener('keydown', this.keyDown.bind(this));
         document.addEventListener('keyup', this.keyUp.bind(this));
     }
 
-    private clear(): void {
-        this.ctx.fillStyle = 'black';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    // provided for convenience, but in theory this shouldn't be needed
-    public refresh(): void {
-        this.clear();
-        this.ctx.fillStyle = 'rgb(0, 176, 162)';
-        // draw existing board state
-        const cellWidth = this.canvas.width / BOARD_WIDTH;
-        const cellHeight = this.canvas.height / BOARD_HEIGHT;
-        for (let i = 0; i < BOARD_HEIGHT; i++) {
-            for (let j = 0; j < BOARD_WIDTH; j++) {
-                if (this.tetris.board[i][j]) {
-                    this.ctx.fillRect(
-                        cellWidth * (j + 1 / 8),
-                        cellHeight * (i + 1 / 8),
-                        (cellWidth * 6) / 8,
-                        (cellHeight * 6) / 8,
-                    );
-                }
-            }
-        }
-        // draw preview on top
-        if (this.cursor) {
-            let fillStyle = 'rgba(0, 176, 162, 0.5)';
-            if (this.drawing) {
-                if (this.drawMode === 'erase') {
-                    fillStyle = 'black';
-                } else {
-                    fillStyle = 'rgb(0, 176, 162)';
-                }
-            }
-            if (this.drawMode == 'column') {
-                for (let i = this.cursor.y; i < BOARD_HEIGHT; i++) {
-                    this.ctx.fillStyle = 'black';
-                    this.ctx.fillRect(
-                        cellWidth * (this.cursor.x + 1 / 8),
-                        cellHeight * (i + 1 / 8),
-                        (cellWidth * 6) / 8,
-                        (cellHeight * 6) / 8,
-                    );
-                    this.ctx.fillStyle = fillStyle;
-                    this.ctx.fillRect(
-                        cellWidth * (this.cursor.x + 1 / 8),
-                        cellHeight * (i + 1 / 8),
-                        (cellWidth * 6) / 8,
-                        (cellHeight * 6) / 8,
-                    );
-                }
-            } else {
-                this.ctx.fillStyle = 'black';
-                this.ctx.fillRect(
-                    cellWidth * (this.cursor.x + 1 / 8),
-                    cellHeight * (this.cursor.y + 1 / 8),
-                    (cellWidth * 6) / 8,
-                    (cellHeight * 6) / 8,
-                );
-                this.ctx.fillStyle = fillStyle;
-                this.ctx.fillRect(
-                    cellWidth * (this.cursor.x + 1 / 8),
-                    cellHeight * (this.cursor.y + 1 / 8),
-                    (cellWidth * 6) / 8,
-                    (cellHeight * 6) / 8,
-                );
-            }
-        }
-    }
-
     private draw(cursorX: number, cursorY: number) {
-        if (this.drawMode === undefined) {
-            // attempt to look up cell to figure out what to do
-            try {
-                const cell = this.tetris.getCell(cursorY, cursorX);
-                this.drawMode = cell ? 'erase' : 'cell';
-            } catch {
-                return;
+        const setCell = (x: number, y: number, value: boolean) => {
+            if (x < 0 || x >= BOARD_HEIGHT || y < 0 || y >= BOARD_WIDTH) return;
+            const cell = this.cells[x][y];
+            if (value) {
+                // random block 1-3
+                cell.classList = 'cell block-' + Math.floor(Math.random() * 3 + 1);
+            } else {
+                cell.classList = 'cell';
             }
+            this.tetris.setCell(x, y, value);
         }
         if (this.drawMode === 'cell') {
-            this.tetris.setCell(cursorY, cursorX, true);
+            setCell(cursorX, cursorY, true);
         } else if (this.drawMode === 'erase') {
-            this.tetris.setCell(cursorY, cursorX, false);
+            setCell(cursorX, cursorY, false);
         } else if (this.drawMode === 'column') {
-            for (let i = 0; i < cursorY; i++) {
-                this.tetris.setCell(i, cursorX, false);
+            for (let i = 0; i < cursorX; i++) {
+                setCell(i, cursorY, false);
             }
-            for (let i = cursorY; i < BOARD_HEIGHT; i++) {
-                this.tetris.setCell(i, cursorX, true);
+            for (let i = cursorX; i < BOARD_HEIGHT; i++) {
+                setCell(i, cursorY, true);
             }
         }
-    }
-
-    private getCell(mouseX: number, mouseY: number): { x: number; y: number } {
-        const cellWidth = this.canvas.width / BOARD_WIDTH;
-        const cellHeight = this.canvas.height / BOARD_HEIGHT;
-        const cursorX = Math.floor(mouseX / cellWidth);
-        const cursorY = Math.floor(mouseY / cellHeight);
-        return { x: cursorX, y: cursorY };
     }
 
     private mouseDown(e: MouseEvent): void {
@@ -135,49 +103,77 @@ export class TetrisPreview {
         if (this.cursor) {
             if (this.drawMode == 'column') {
                 this.draw(this.cursor.x, this.cursor.y);
-            } else {
+            } else if (this.cursor.x < BOARD_HEIGHT) {
                 // use first cell to decide if erasing or drawing
-                try {
-                    const cell = this.tetris.getCell(
-                        this.cursor.y,
-                        this.cursor.x,
-                    );
-                    this.drawMode = cell ? 'erase' : 'cell';
-                    this.draw(this.cursor.x, this.cursor.y);
-                } catch (e) {
-                    console.error(e);
-                }
+                const cell = this.tetris.getCell(this.cursor.x, this.cursor.y);
+                this.drawMode = cell ? 'erase' : 'cell';
+                this.draw(this.cursor.x, this.cursor.y);
             }
         }
-        this.refresh();
+        this.resetHover();
     }
 
     private mouseUp(): void {
         this.drawing = false;
-        this.refresh();
+        this.resetHover();
+    }
+
+    private bresenham(x0: number, y0: number, x1: number, y1: number) {
+        const dx = Math.abs(x1 - x0);
+        const dy = Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1;
+        const sy = y0 < y1 ? 1 : -1;
+        let err = dx - dy;
+        while (true) {
+            this.draw(x0, y0);
+            if (x0 === x1 && y0 === y1) break;
+            const err2 = err * 2;
+            if (err2 > -dy) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (err2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
     }
 
     private mouseMove(e: MouseEvent): void {
-        const newCursor = this.getCell(e.offsetX, e.offsetY);
+        const x = (e.currentTarget as HTMLTableCellElement).getAttribute('data-x');
+        const y = (e.currentTarget as HTMLTableCellElement).getAttribute('data-y');
+        if (x === null || y === null) {
+            this.cursor = undefined;
+            return;
+        }
+        const newCursor = { x: parseInt(x), y: parseInt(y) };
         if (this.drawing) {
-            if (
-                this.cursor === undefined ||
-                this.cursor.x !== newCursor.x ||
-                this.cursor.y !== newCursor.y
-            ) {
+            if (this.cursor === undefined) {
                 this.draw(newCursor.x, newCursor.y);
-                this.cursor = newCursor;
+            } else if (this.cursor.x !== newCursor.x || this.cursor.y !== newCursor.y) {
+                this.bresenham(this.cursor.x, this.cursor.y, newCursor.x, newCursor.y);
             }
+            this.cursor = newCursor;
         } else {
             this.cursor = newCursor;
+            this.resetHover();
         }
-        this.refresh();
     }
 
     private mouseLeave(): void {
         this.cursor = undefined;
-        // TODO: if column, should clear column????
-        this.refresh();
+        this.resetHover();
+    }
+
+    private resetHover(): void {
+        this.wrapper.querySelectorAll('.hover').forEach((elem) => {
+            elem.classList.remove('hover');
+        });
+        if (this.cursor && !this.drawing && this.drawMode === 'column') {
+            for (let i = this.cursor.x; i < BOARD_HEIGHT; i++) {            
+                this.cells[i][this.cursor.y].classList.add('hover');
+            }
+        }
     }
 
     public keyDown(e: KeyboardEvent): void {
@@ -185,7 +181,7 @@ export class TetrisPreview {
         if (e.key === 'Shift') {
             this.drawMode = 'column';
         }
-        this.refresh();
+        this.resetHover();
     }
 
     public keyUp(e: KeyboardEvent): void {
@@ -193,6 +189,6 @@ export class TetrisPreview {
         if (e.key === 'Shift') {
             this.drawMode = 'cell';
         }
-        this.refresh();
+        this.resetHover();
     }
 }
