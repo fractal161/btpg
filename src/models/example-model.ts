@@ -8,6 +8,7 @@ import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
 import onnxFile from '../../agents/model.onnx';
 import { Model } from '../model';
 import { module, Placement, TetrisState } from '../tetris';
+import { Parameters } from '../params';
 
 env.wasm.wasmPaths = '/btpg/';
 
@@ -48,7 +49,7 @@ export class ExampleModel implements Model {
         }
     };
 
-    public run = async (tetris: TetrisState): Promise<Placement> => {
+    public run = async (tetris: TetrisState, params: Parameters): Promise<Placement> => {
         if (this.session === undefined) {
             throw Error("session isn't ready!");
         }
@@ -56,10 +57,10 @@ export class ExampleModel implements Model {
         console.log(tetris.board.toString(false, true, true));
         const state = module.GetState(
             tetris.board,
-            0, // current piece
+            params.piece, // current piece
             -1,
             {r: 0, x: 0, y: 0}, // position
-            0, // lines
+            params.lines,
             module.TapSpeed.kTap30Hz,
             18,
             0);
