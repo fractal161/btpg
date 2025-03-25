@@ -1,7 +1,7 @@
 import '../styles/style.css';
 import { ExampleModel } from './models/example-model';
 import { TetrisPreview } from './preview';
-import { Piece, TetrisState } from './tetris';
+import { PIECE_NAMES, TetrisState } from './tetris';
 
 const main = async () => {
     // @ts-ignore
@@ -77,7 +77,7 @@ const main = async () => {
     const createGameConfigMenu = () => {
         const currentSelect = createSelectFromList(
             'current-piece-select',
-            Object.entries(Piece),
+            PIECE_NAMES.map((name, i) => [i.toString(), name]),
         );
         currentSelect.selectedIndex = Math.floor(Math.random() * 7);
         const currentField = wrapSelectInField(currentSelect, 'Current piece:');
@@ -194,7 +194,7 @@ const main = async () => {
     const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;
     evalButton.addEventListener('click', async () => {
         try {
-            const result = await model.run();
+            const result = await model.run(state);
             console.log(result);
         } catch (e) {
             console.error(e);

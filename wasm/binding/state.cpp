@@ -3,12 +3,12 @@
 #include "calculate_moves.h"
 
 MultiState GetState(
-    const ByteBoard& byte_board, int now_piece, int next_piece, const Position& premove,
+    const Board& board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
   State state = {};
   memset(state.board.data(), 0, sizeof(state.board));
 
-  Board board(byte_board);
+  ByteBoard byte_board = board.ToByteBoard();
   int level = GetLevelByLines(lines);
   int count = board.Count();
   int pieces = (lines * 10 + count) / 4;
@@ -121,9 +121,9 @@ MultiState GetState(
 }
 
 MultiState GetStateAllNextPieces(
-    const ByteBoard& byte_board, int now_piece, const Position& premove,
+    const Board& board, int now_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
-  MultiState ret = GetState(byte_board, now_piece, 0, premove, lines, tap_speed, adj_delay, aggression_level);
+  MultiState ret = GetState(board, now_piece, 0, premove, lines, tap_speed, adj_delay, aggression_level);
   ret.resize(7);
   for (int i = 1; i < 7; i++) {
     memcpy(ret.board[i].data(), ret.board[0].data(), sizeof(State::board));

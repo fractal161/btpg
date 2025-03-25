@@ -56,9 +56,9 @@ struct MultiState {
 
 // next_piece == -1 for pre-adj
 MultiState GetState(
-    const ByteBoard& byte_board, int now_piece, int next_piece, const Position& premove,
+    const Board& board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level);
 
 MultiState GetStateAllNextPieces(
-    const ByteBoard& byte_board, int now_piece, const Position& premove,
+    const Board& board, int now_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level);

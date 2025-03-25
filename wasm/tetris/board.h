@@ -245,6 +245,9 @@ class alignas(32) Board {
       default: unreachable();
     }
   }
+  constexpr bool IsCellFilled(int row, int col) const {
+    return !IsCellSet(row, col);
+  }
 
   constexpr bool IsColumnRangeSet(int row_start, int row_end, int col) const {
     uint32_t mask = (1 << row_end) - (1 << row_start);

@@ -52,8 +52,9 @@ EMSCRIPTEN_BINDINGS(my_module) {
       .function("place", &Board::PlaceInplace)
       .function("clearLines", &Board::ClearLinesInplace)
       .function("count", &Board::Count)
-      .function("placementNotation", &Board::PlacementNotation)
       .function("setCellFilled", &Board::SetCellFilled)
       .function("setCellEmpty", &Board::SetCellEmpty)
+      .function("isCellFilled", &Board::IsCellFilled)
+      .function("placementNotation", &Board::PlacementNotation)
       .function("toString", &Board::ToString);
 }

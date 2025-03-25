@@ -7,11 +7,9 @@
 import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
 import onnxFile from '../../agents/model.onnx';
 import { Model } from '../model';
-import { Placement } from '../tetris';
-import Module from '../../wasm/tetris.js';
+import { module, Placement, TetrisState } from '../tetris';
 
 env.wasm.wasmPaths = '/btpg/';
-const module = await Module();
 
 function calculateShape(nestedArray: Array<any>) {
     const shape = [];
@@ -50,16 +48,15 @@ export class ExampleModel implements Model {
         }
     };
 
-    public run = async (): Promise<Placement> => {
+    public run = async (tetris: TetrisState): Promise<Placement> => {
         if (this.session === undefined) {
             throw Error("session isn't ready!");
         }
 
-        const board = Array.from({length:20}, () => Array(10).fill(1));
-        console.log(board);
+        console.log(tetris.board.toString(false, true, true));
         const state = module.GetState(
-            board,
-            0,
+            tetris.board,
+            0, // current piece
             -1,
             {r: 0, x: 0, y: 0}, // position
             0, // lines

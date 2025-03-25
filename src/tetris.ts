@@ -1,53 +1,33 @@
+import Module, { Board } from '../wasm/tetris.js';
+
+export const module = await Module();
+
 export const BOARD_HEIGHT = 20;
 export const BOARD_WIDTH = 10;
 
 export enum Piece {
-    T = 'T',
-    J = 'J',
-    Z = 'Z',
-    O = 'O',
-    S = 'S',
-    L = 'L',
-    I = 'I',
-}
+    T = 0,
+    J = 1,
+    Z = 2,
+    O = 3,
+    S = 4,
+    L = 5,
+    I = 6,
+};
+export const PIECE_NAMES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
 
 // coordinate system is right+down, i.e. lower-indexed rows are higher up
 export class TetrisState {
     constructor(
-        public readonly board: Array<Array<boolean>> = [
-            ...Array(BOARD_HEIGHT),
-        ].map((_) => Array(BOARD_WIDTH).fill(false)),
-        public current: Piece = Piece.T,
-        public next: Piece = Piece.T,
+        public readonly board: Board = new module.Board,
     ) {}
 
-    public getCell(row: number, col: number): boolean {
-        if (row < 0 || row >= BOARD_HEIGHT || col < 0 || col >= BOARD_WIDTH) {
-            throw Error('coordinates out of bounds');
-        }
-        return this.board[row][col];
+    public setCell(x: number, y: number, value: boolean) {
+        value ? this.board.setCellFilled(x, y) : this.board.setCellEmpty(x, y);
     }
 
-    public setCell(row: number, col: number, state: boolean) {
-        if (row < 0 || row >= BOARD_HEIGHT || col < 0 || col >= BOARD_WIDTH) {
-            throw Error('coordinates out of bounds');
-        }
-        this.board[row][col] = state;
-    }
-
-    public toggleCell(row: number, col: number) {
-        if (row < 0 || row >= BOARD_HEIGHT || col < 0 || col >= BOARD_WIDTH) {
-            throw Error('coordinates out of bounds');
-        }
-        this.board[row][col] = !this.board[row][col];
-    }
-
-    public clearBoard() {
-        for (let i = 0; i < BOARD_HEIGHT; i++) {
-            for (let j = 0; j < BOARD_WIDTH; j++) {
-                this.board[i][j] = false;
-            }
-        }
+    public getCell(x: number, y: number): boolean {
+        return this.board.isCellFilled(x, y);
     }
 }
 
