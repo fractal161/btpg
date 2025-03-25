@@ -18,28 +18,33 @@ const main = async () => {
         preview,
     );
 
-    // TODO: disable button until model is fully loaded
-    // also indicate that the model is being loaded lmao
+    const Sleep = async (ms: number) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    };
 
+    const evalButton = document.getElementById('eval') as HTMLButtonElement;
+    const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
+    const loadingText = document.getElementById('loading-text')! as HTMLSpanElement;
+    evalButton.disabled = true;
+    loadingDiv.style.display = 'block';
     const model = await ExampleModel.create();
-
-    // TODO: make this actually call the model lol
-    const evalButton = document.querySelector<HTMLButtonElement>('#eval')!;
+    evalButton.disabled = false;
+    loadingDiv.style.display = 'none';
+    loadingText.innerText = 'Evaluating...';
     evalButton.addEventListener('click', async () => {
         try {
+            evalButton.disabled = true;
+            loadingDiv.style.display = 'block';
+            await Sleep(1); // make UI change visible
             const result = await model.run(state, parameters);
+            await Sleep(1); // prevent double-click
             console.log(result);
         } catch (e) {
             console.error(e);
+        } finally {
+            evalButton.disabled = false;
+            loadingDiv.style.display = 'none';
         }
     });
-
-    // global event listeners
-
-    const keyDown = (e: KeyboardEvent) => {
-        preview.keyDown(e);
-    };
-
-    document.addEventListener('keydown', keyDown);
 };
 main();
