@@ -3,7 +3,6 @@
 #include <map>
 #include <bitset>
 #include <unordered_map>
-#include "../tetris/move_search_no_tmpl.h"
 
 struct PrecomputedTableCache {
   struct PrecomputedTableKey {
@@ -33,7 +32,7 @@ PossibleMoves MoveSearch(
   return MoveSearch(level, adj_frame, taps.data(), table, b, piece);
 }
 
-MoveMap CalculateMoves(
+std::pair<PossibleMoves, MoveMap> CalculateMoves(
     const Board& b, int now_piece, Level level, int adj_frame, const std::array<int, 10>& taps, const Position& premove) {
   auto moves = MoveSearch(level, adj_frame, taps, b, now_piece);
   if (moves.non_adj.empty() && moves.adj.empty()) {
@@ -82,5 +81,5 @@ MoveMap CalculateMoves(
     }
     for (auto& i : moves.adj[initial_move].second) move_map[i.r][i.x][i.y] = kNoAdj;
   }
-  return move_map;
+  return {moves, move_map};
 }

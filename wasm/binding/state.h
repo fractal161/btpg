@@ -2,6 +2,7 @@
 
 #include "../tetris/board.h"
 #include "../tetris/position.h"
+#include "calculate_moves.h"
 
 enum TapSpeed {
   kTap10Hz,
@@ -54,8 +55,14 @@ struct MultiState {
   }
 };
 
+struct StateDetail {
+  MultiState state;
+  PossibleMoves moves;
+  MoveMap move_map;
+};
+
 // next_piece == -1 for pre-adj
-MultiState GetState(
+StateDetail GetState(
     const Board& board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level);
 

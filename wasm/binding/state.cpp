@@ -1,8 +1,6 @@
 #include "state.h"
 
-#include "calculate_moves.h"
-
-MultiState GetState(
+StateDetail GetState(
     const Board& board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
   State state = {};
@@ -19,6 +17,9 @@ MultiState GetState(
   // meta_int: shape (2,) [entry, now_piece]
   // moves: shape (14, 20, 10) [board, one, moves(4), adj_moves(4), initial_move(4), nonreduce_moves(4)]
   // move_meta: shape (28,) [speed(4), to_transition(21), (level-18)*0.1, lines*0.01, pieces*0.004]
+  auto [moves, move_map] = CalculateMoves(
+    board, now_piece, level_speed, adj_delay, kTapTables[static_cast<int>(tap_speed)],
+    is_adj ? premove : Position::Invalid);
   {
     for (int i = 0; i < 20; i++) {
       for (int j = 0; j < 10; j++) state.board[0][i][j] = byte_board[i][j];
@@ -26,9 +27,6 @@ MultiState GetState(
       for (int j = 0; j < 10; j++) state.moves[0][i][j] = byte_board[i][j];
       for (int j = 0; j < 10; j++) state.moves[1][i][j] = 1;
     }
-    auto move_map = CalculateMoves(
-      board, now_piece, level_speed, adj_delay, kTapTables[static_cast<int>(tap_speed)],
-      is_adj ? premove : Position::Invalid);
     for (int r = 0; r < 4; r++) {
       for (int i = 0; i < 20; i++) {
         for (int j = 0; j < 10; j++) {
@@ -117,13 +115,13 @@ MultiState GetState(
 
   MultiState ret;
   ret.from_state(std::move(state));
-  return ret;
+  return {ret, moves, move_map};
 }
 
 MultiState GetStateAllNextPieces(
     const Board& board, int now_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
-  MultiState ret = GetState(board, now_piece, 0, premove, lines, tap_speed, adj_delay, aggression_level);
+  MultiState ret = GetState(board, now_piece, 0, premove, lines, tap_speed, adj_delay, aggression_level).state;
   ret.resize(7);
   for (int i = 1; i < 7; i++) {
     memcpy(ret.board[i].data(), ret.board[0].data(), sizeof(State::board));

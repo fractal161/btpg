@@ -5,8 +5,6 @@ import { TetrisPreview } from './preview';
 import { TetrisState } from './tetris';
 
 const main = async () => {
-    // @ts-ignore
-
     const state = new TetrisState();
 
     const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;

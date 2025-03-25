@@ -7,10 +7,11 @@
 import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
 import onnxFile from '../../agents/model.onnx';
 import { Model } from '../model';
-import { module, Placement, TetrisState } from '../tetris';
+import { module, PIECE_NAMES, Placement, TetrisState } from '../tetris';
 import { Parameters } from '../params';
 
 env.wasm.wasmPaths = '/btpg/';
+env.wasm.numThreads = 0;
 
 function calculateShape(nestedArray: Array<any>) {
     const shape = [];
@@ -49,13 +50,15 @@ export class ExampleModel implements Model {
         }
     };
 
-    public run = async (tetris: TetrisState, params: Parameters): Promise<Placement> => {
+    public run = async (tetris: TetrisState, params: Parameters) => {
         if (this.session === undefined) {
             throw Error("session isn't ready!");
         }
 
+        const startTime = performance.now();
+
         console.log(tetris.board.toString(false, true, true));
-        const state = module.GetState(
+        const state_pair = module.GetState(
             tetris.board,
             params.piece, // current piece
             -1,
@@ -64,6 +67,7 @@ export class ExampleModel implements Model {
             params.tapSpeed,
             params.reactionTime,
             params.aggression);
+        const state = state_pair.state;
 
         // prepare feeds. use model input names as keys.
         const feeds = {
@@ -73,16 +77,61 @@ export class ExampleModel implements Model {
             move_meta: createONNXTensor(state.move_meta),
             meta_int: createONNXTensor(state.meta_int, 'int32'),
         };
-        console.log(feeds);
 
         // feed inputs and run
         const results = await this.session.run(feeds);
         const pi = results.pi.data;
         const pi_rank = results.pi_rank.data;
         const v = results.v.data;
-        console.log(pi, pi_rank, v);
-        const best = Number(pi_rank[0]);
+        const best = new Placement(Number(pi_rank[0]));
+        console.log(v);
 
-        return { rot: ~~(best / 200), x: ~~(best / 10) % 20, y: best % 10 };
+        const move_mode = state_pair.move_map[best.r][best.x][best.y];
+        if (move_mode == 1) {
+            const moves = [{prob: pi[Number(pi_rank[0])], position: best}];
+            for (let i = 1; i < 5; i++) {
+                const prob = pi[Number(pi_rank[i])];
+                const pos = new Placement(Number(pi_rank[i]));
+                if (prob < 0.001 || state_pair.move_map[pos.r][pos.x][pos.y] != 1) break;
+                moves.push({prob: prob, position: pos});
+            }
+            console.log(moves);
+        } else if (move_mode == 3) {
+            const adj_state = module.GetStateAllNextPieces(
+                tetris.board,
+                params.piece,
+                best,
+                params.lines,
+                params.tapSpeed,
+                params.reactionTime,
+                params.aggression);
+            const adj_feeds = {
+                board: createONNXTensor(adj_state.board),
+                meta: createONNXTensor(adj_state.meta),
+                moves: createONNXTensor(adj_state.moves),
+                move_meta: createONNXTensor(adj_state.move_meta),
+                meta_int: createONNXTensor(adj_state.meta_int, 'int32'),
+            };
+            const adj_results = await this.session.run(adj_feeds);
+            const pi_rank = adj_results.pi_rank.data;
+            const v = adj_results.v.data;
+            const adj_best = PIECE_NAMES.map((_, i) => new Placement(Number(pi_rank[i * 800])));
+            const adj_vals = PIECE_NAMES.map((_, i) => [v[i], v[i+7], v[i+14]]);
+
+            const best_premove = module.GetBestAdjModes(
+                tetris.board,
+                params.piece,
+                params.lines,
+                params.tapSpeed,
+                params.reactionTime,
+                state_pair.moves,
+                adj_best);
+            console.log(adj_best, adj_vals, best_premove);
+        } else {
+            throw Error("Invalid move mode");
+        }
+        const finishTime = performance.now();
+        const elapsedTime = finishTime - startTime;
+        console.log(`Elapsed time: ${elapsedTime} ms`);
     };
 }

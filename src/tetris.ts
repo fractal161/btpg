@@ -31,8 +31,24 @@ export class TetrisState {
     }
 }
 
-export interface Placement {
-    x: number;
-    y: number;
-    rot: number;
+export class Placement {
+    public r: number;
+    public x: number;
+    public y: number;
+
+    constructor(
+        r: number,
+        x?: number,
+        y?: number,
+    ) {
+        if (x === undefined || y === undefined) {
+            this.r = ~~(r / 200);
+            this.x = ~~(r / 10) % 20;
+            this.y = r % 10;
+        } else {
+            this.r = r;
+            this.x = x;
+            this.y = y;
+        }
+    }
 }
