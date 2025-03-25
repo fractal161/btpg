@@ -1,4 +1,5 @@
 #include "binding/state.h"
+#include "binding/board.h"
 
 #include <emscripten/bind.h>
 #include "emarray.h"
@@ -44,4 +45,15 @@ EMSCRIPTEN_BINDINGS(my_module) {
 
   emscripten::function("GetState", &GetState);
   emscripten::function("GetStateAllNextPieces", &GetStateAllNextPieces);
+
+  emscripten::class_<Board>("Board")
+      .constructor(&CreateBoard, emscripten::allow_raw_pointers())
+      .function("getArray", &Board::ToByteBoard)
+      .function("place", &Board::PlaceInplace)
+      .function("clearLines", &Board::ClearLinesInplace)
+      .function("count", &Board::Count)
+      .function("placementNotation", &Board::PlacementNotation)
+      .function("setCellFilled", &Board::SetCellFilled)
+      .function("setCellEmpty", &Board::SetCellEmpty)
+      .function("toString", &Board::ToString);
 }

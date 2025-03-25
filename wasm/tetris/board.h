@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
@@ -256,7 +257,7 @@ class alignas(32) Board {
     }
   }
 
-  constexpr std::pair<int, Board> ClearLines() const {
+  constexpr std::pair<int, Board> ClearLines(uint32_t* clear_mask = nullptr) const {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnarrowing"
     // use an order in favor of vectorization
@@ -269,6 +270,7 @@ class alignas(32) Board {
     uint32_t linemask = (cols[0] | cols[1] | cols[2] | cols[3] | cols[4] |
                          cols[5] | cols[6] | cols[8] | cols[9] | cols[10]) & kColumnMask;
     if (linemask == kColumnMask) return {0, *this};
+    if (clear_mask) *clear_mask = ~linemask & kColumnMask;
     int lines = 20 - popcount(linemask);
     for (int i = 0; i < 11; i++) {
       cols[i] = pext(cols[i], linemask) << lines | ((1 << lines) - 1);
@@ -278,6 +280,19 @@ class alignas(32) Board {
         cols[1] | (uint64_t)cols[5] << 22 | (uint64_t)cols[9] << 44,
         cols[2] | (uint64_t)cols[6] << 22 | (uint64_t)cols[10] << 44,
         cols[3]}};
+  }
+
+  constexpr std::vector<int> ClearLinesInplace() {
+    uint32_t clear_mask;
+    auto new_board = ClearLines(&clear_mask).second;
+    std::vector<int> ret;
+    while (clear_mask) {
+      int line = ctz(clear_mask);
+      ret.push_back(line);
+      clear_mask &= ~(1 << line);
+    }
+    *this = new_board;
+    return ret;
   }
 
   // x = 1 or 2 for these 4 methods
@@ -520,6 +535,10 @@ class alignas(32) Board {
     unreachable();
   }
 
+  constexpr void PlaceInplace(int piece, int r, int x, int y) {
+    *this = Place(piece, r, x, y);
+  }
+
   constexpr int Height() const {
     uint32_t col_and = (
         b1 & b2 & b3 & b4 &
@@ -543,6 +562,55 @@ class alignas(32) Board {
     Board r = {~b1, ~b2, ~b3, ~b4};
     r.Normalize();
     return r;
+  }
+
+  std::string ToString(bool invert = false, bool compact = true, bool row_numbers = true) const {
+    Board obj = invert ? ~*this : *this;
+    uint64_t p = obj.b1 & obj.b2 & obj.b3 & (obj.b4 | ~(uint64_t)kColumnMask);
+    uint32_t rows = ~(p & p >> 22 & p >> 44) & kColumnMask;
+    int first_row = rows == 0 ? 20 : ctz(rows);
+    if (first_row > 0) first_row--;
+    if (!compact) first_row = 0;
+
+    std::string ret;
+    auto b = obj.ToByteBoard();
+    for (int row = first_row; row < 20; row++) {
+      if (row_numbers) {
+        std::string str = std::to_string(row);
+        if (str.size() == 1) str = ' ' + str;
+        ret += str + ' ';
+      }
+      for (auto i : b[row]) ret += "X."[i];
+      ret += '\n';
+    }
+    return ret;
+  }
+
+  std::string PlacementNotation(int piece, int r, int x, int y) const {
+    static constexpr int kColOffsets[7][4][2] = {
+      {{-1,2},{-1,1},{-1,2},{0,2}},
+      {{-1,2},{-1,1},{-1,2},{0,2}},
+      {{-1,2},{0,2}},
+      {{-1,1}},
+      {{-1,2},{0,2}},
+      {{-1,2},{-1,1},{-1,2},{0,2}},
+      {{-2,2},{0,1}}
+    };
+    static constexpr char kRotMarks[7][5] = {
+      "dlur", "dlur", "--", "-", "--", "dlur", "--"
+    };
+    std::string ret{"TJZOSLI"[piece]};
+    ret += kRotMarks[piece][r];
+    if (kRotMarks[piece][r] != '-') ret += '-';
+    for (int i = y + kColOffsets[piece][r][0]; i < y + kColOffsets[piece][r][1]; i++) {
+      ret += '0' + (i + 1) % 10;
+    }
+    uint32_t col = PieceMap(piece)[r].Column(y);
+    col = col & ~(col >> 1);
+    if (col >> x & 1) {
+      ret += std::string(popcount(col & ((1 << x) - 1)), '*');
+    }
+    return ret;
   }
 
   static const Board Zeros;
