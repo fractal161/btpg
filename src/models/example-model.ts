@@ -61,9 +61,9 @@ export class ExampleModel implements Model {
             -1,
             {r: 0, x: 0, y: 0}, // position
             params.lines,
-            module.TapSpeed.kTap30Hz,
-            18,
-            0);
+            params.tapSpeed,
+            params.reactionTime,
+            params.aggression);
 
         // prepare feeds. use model input names as keys.
         const feeds = {
