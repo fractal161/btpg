@@ -24,13 +24,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BetaTetris Playground</title>
   </head>
-  <body>
-    <div id="app">
+  <body class="m-0 flex min-w-80">
+    <div id="app" class="max-w-7xl mb-12 text-center mx-auto">
       <h1>BetaTetris Playground</h1>
       <div>created by adrien1018 and fractal161</div>
-      <div class="preview">
-        <div id="board-wrapper"></div>
-        <div id="config" class="w-60">
+      <div class="mt-4 gap-4 flex flex-row flex-wrap justify-center">
+        <div class="pt-3 w-68 min-w-68">
+          <div id="board-wrapper"></div>
+          <div class="text-sm mt-1 hidden sm:block">Ctrl+drag to fill columns quickly!</div>
+        </div>
+        <div id="config" class="w-60 min-w-60">
           <!-- actual options are added with js -->
           <fieldset id="game-param-config">
             <legend>Game Config</legend>
@@ -38,17 +41,40 @@
           <fieldset id="model-param-config">
             <legend>Model Config</legend>
           </fieldset>
-          <div class="card">
+          <div class="mt-4">
             <button id="eval" type="button" disabled="">Evaluate</button>
           </div>
-          <div id="loading">
+          <div id="loading" class="mt-4">
             <div class="loader"></div>
             <span id="loading-text">Loading model...</span>
           </div>
-          <div class="text-left mt-2">
-            <div id="message-full-line" class="hidden">⛔Error: There are filled rows.</div>
-            <div id="message-odd-cells" class="hidden">⚠️Warning: The number of filled cells is an odd number.</div>
+          <div class="text-left mt-4 text-sm">
+            <div id="message-full-line" class="hidden">⛔ There are filled rows.</div>
+            <div id="message-odd-cells" class="hidden">⚠️ The number of filled cells is an odd number.</div>
+            <div id="message-no-webgpu" class="hidden">⚠️ WebGPU is not supported on this browser. Analysis may take longer to run.</div>
           </div>
+        </div>
+        <div class="w-68 min-w-68">
+          <fieldset class="min-h-full">
+            <legend>Analysis</legend>
+            <div id="analysis-score" class="hidden">
+              <div class="my-2">Scoring potential</div>
+              <table id="analysis-score-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+            </div>
+            <div id="analysis-hover" class="hidden">
+              <div class="my-2">Good hover positions</div>
+              <table id="analysis-hover-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+            </div>
+            <div id="analysis-adjustments" class="hidden">
+              <div class="my-2">Adjustments</div>
+              <table id="analysis-adjustments-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+            </div>
+            <div id="analysis-placements" class="hidden">
+              <div class="my-2">Placements</div>
+              <table id="analysis-placements-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+            </div>
+            <div id="analysis-elapsed" class="text-sm mt-3 mb-2 hidden">✅ Analysis finished in 12345 ms.</div>
+          </fieldset>
         </div>
       </div>
       <h2>About</h2>
@@ -66,9 +92,9 @@
         on an unmodified version of the game. Many of these accomplishments
         required custom fine tuning, meaning BetaTetris isn't technically just
         one AI, but rather a collection of agents that each excel at a specific
-        task. Here, you can BetaTetris to analyze any position with a number of
-        parameters, allowing you to learn by example from a world class Tetris
-        player.
+        task. Here, you can use the latest version of BetaTetris to analyze
+        any position with a number of parameters, allowing you to learn by example
+        from a world class Tetris player.
       </p>
       <h2>Related</h2>
       <p class="text">Check out these other cool sites!</p>

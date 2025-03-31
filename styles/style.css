@@ -18,13 +18,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -33,25 +26,6 @@ h1 {
 
 fieldset {
   border: 1px rgba(255, 255, 255, 0.87) solid;
-}
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  margin-bottom: 3em;
-  text-align: center;
-}
-
-.card {
-  margin: 1em 0em;
-}
-
-.preview {
-  margin-top: 1em;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 1em;
 }
 
 .field {
@@ -125,6 +99,39 @@ button:focus-visible {
   }
 }
 
+/* analysis */
+table.analysis {
+  @apply w-full border-spacing-x-0 border-spacing-y-1;
+}
+td.cell-hover-mode {
+  @apply px-1 bg-gray-600;
+}
+td.cell-placement {
+  @apply px-1 bg-cyan-700;
+}
+td.cell-probability {
+  @apply px-1 bg-red-900;
+}
+td.cell-piece {
+  @apply px-1 bg-yellow-800;
+}
+td.cell-rank-1 {
+  @apply px-1 text-black bg-yellow-300;
+}
+td.cell-rank-2 {
+  @apply px-1 text-black bg-gray-300;
+}
+td.cell-rank-3 {
+  @apply px-1 bg-orange-800;
+}
+td.cell-rank {
+  @apply px-1 bg-gray-700;
+}
+td.cell-score {
+  @apply px-1 bg-emerald-900;
+}
+
+/* game field */
 .board {
   border-spacing: 0px;
   user-select: none;
