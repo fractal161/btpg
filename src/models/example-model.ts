@@ -55,8 +55,16 @@ export class ExampleModel implements Model {
             throw Error("session isn't ready!");
         }
 
-        const startTime = performance.now();
+        const query = {
+            board: tetris.board.getArray(),
+            piece: params.piece,
+            lines: params.lines,
+            tapSpeed: params.tapSpeed.value,
+            reactionTime: params.reactionTime,
+            aggression: params.aggression,
+        };
 
+        const startTime = performance.now();
         console.log(tetris.board.toString(false, true, true));
         const state_pair = module.GetState(
             tetris.board,
@@ -87,6 +95,7 @@ export class ExampleModel implements Model {
         console.log(v);
 
         const move_mode = state_pair.move_map[best.r][best.x][best.y];
+        const result: Record<string, any> = {query: query, eval: Array.from(v)};
         if (move_mode == 1) {
             const moves = [{prob: pi[Number(pi_rank[0])], position: best}];
             for (let i = 1; i < 5; i++) {
@@ -95,7 +104,8 @@ export class ExampleModel implements Model {
                 if (prob < 0.001 || state_pair.move_map[pos.r][pos.x][pos.y] != 1) break;
                 moves.push({prob: prob, position: pos});
             }
-            console.log(moves);
+            result.adjustment = false;
+            result.moves = moves;
         } else if (move_mode == 3) {
             const adj_state = module.GetStateAllNextPieces(
                 tetris.board,
@@ -126,12 +136,17 @@ export class ExampleModel implements Model {
                 params.reactionTime,
                 state_pair.moves,
                 adj_best);
-            console.log(adj_best, adj_vals, best_premove);
+            result.adjustment = true;
+            result.adj_best = adj_best;
+            result.adj_vals = adj_vals;
+            result.best_premove = best_premove;
         } else {
             throw Error("Invalid move mode");
         }
         const finishTime = performance.now();
         const elapsedTime = finishTime - startTime;
-        console.log(`Elapsed time: ${elapsedTime} ms`);
+        result.elapsed_time = elapsedTime;
+        console.log(JSON.stringify(result));
+        return result;
     };
 }
