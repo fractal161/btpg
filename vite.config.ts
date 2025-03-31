@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import tailwindcss from '@tailwindcss/vite'
 
 // https://github.com/mycelial/mycelial-js/issues/25#issuecomment-1533305723
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     viteStaticCopy({
       targets: [
         {

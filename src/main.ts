@@ -24,15 +24,15 @@ const main = async () => {
     const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
     const loadingText = document.getElementById('loading-text')! as HTMLSpanElement;
     evalButton.disabled = true;
-    loadingDiv.style.display = 'block';
+    loadingDiv.classList.remove('hidden');
     const model = await ExampleModel.create();
     evalButton.disabled = false;
-    loadingDiv.style.display = 'none';
+    loadingDiv.classList.add('hidden');
     loadingText.innerText = 'Evaluating...';
     evalButton.addEventListener('click', async () => {
         try {
             evalButton.disabled = true;
-            loadingDiv.style.display = 'block';
+            loadingDiv.classList.remove('hidden');
             await Sleep(1); // make UI change visible
             const result = await model.run(state, parameters);
             await Sleep(1); // prevent double-click
@@ -41,7 +41,7 @@ const main = async () => {
             console.error(e);
         } finally {
             evalButton.disabled = false;
-            loadingDiv.style.display = 'none';
+            loadingDiv.classList.add('hidden');
         }
     });
 };

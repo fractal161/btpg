@@ -1,3 +1,8 @@
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -11,11 +16,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  min-width: 0;
-  min-height: 0;
 }
 
 body {
@@ -94,8 +94,8 @@ button:focus-visible {
 }
 
 .loader {
-  border: 4px solid #f3f3f3; /* Light grey */
-  border-top: 4px solid rgba(0, 0, 0, 0); /* Blue */
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid rgba(0, 0, 0, 0);
   border-radius: 50%;
   width: 12px;
   height: 12px;
@@ -118,6 +118,10 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+  .loader {
+    border: 4px solid #09a48b;
+    border-top: 4px solid rgba(0, 0, 0, 0);
   }
 }
 

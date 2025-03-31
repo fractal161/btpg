@@ -30,7 +30,7 @@
       <div>created by adrien1018 and fractal161</div>
       <div class="preview">
         <div id="board-wrapper"></div>
-        <div id="config">
+        <div id="config" class="w-60">
           <!-- actual options are added with js -->
           <fieldset id="game-param-config">
             <legend>Game Config</legend>
@@ -44,6 +44,10 @@
           <div id="loading">
             <div class="loader"></div>
             <span id="loading-text">Loading model...</span>
+          </div>
+          <div class="text-left mt-2">
+            <div id="message-full-line" class="hidden">⛔Error: There are filled rows.</div>
+            <div id="message-odd-cells" class="hidden">⚠️Warning: The number of filled cells is an odd number.</div>
           </div>
         </div>
       </div>
