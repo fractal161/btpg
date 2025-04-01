@@ -21,6 +21,10 @@ class Select<T> {
         return this.select.selectedIndex;
     }
 
+    public saveValue() {
+        localStorage.setItem('field-' + this.select.id, this.select.value);
+    }
+
     constructor(
         id: string,
         private keys: Array<T>,
@@ -38,10 +42,16 @@ class Select<T> {
             option.innerText = texts[i];
             this.select.appendChild(option);
         }
-        this.select.selectedIndex = defaultOption;
+        const savedOption = localStorage.getItem('field-' + id);
+        if (savedOption !== null) {
+            this.select.selectedIndex = parseInt(savedOption);
+        } else {
+            this.select.selectedIndex = defaultOption;
+        }
         this._value = keys[defaultOption];
         this.select.addEventListener('change', (e: Event) => {
-            this._value = keys[parseInt((e.target as HTMLSelectElement).value)];
+            this.saveValue();
+            this._value = keys[this.select.selectedIndex];
             this.onchange(e, this._value);
         });
     }
@@ -67,6 +77,10 @@ class Checkbox {
         this.checkbox = document.createElement('input');
         this.checkbox.type = 'checkbox';
         this.checkbox.id = id;
+        this.checkbox.checked = localStorage.getItem('field-' + id) === '1';
+        this.checkbox.addEventListener('change', (_) => {
+            localStorage.setItem('field-' + id, this.checkbox.checked ? '1' : '0');
+        });
         const label = document.createElement('label');
         label.textContent = labelText;
         label.htmlFor = id;
@@ -83,6 +97,7 @@ function createNumberSelector(
     min: number,
     max: number,
     step: number = 1,
+    defaultValue: number = 0,
 ): HTMLInputElement {
     const input = document.createElement('input');
     input.type = 'number';
@@ -90,6 +105,12 @@ function createNumberSelector(
     input.min = min.toString();
     input.max = max.toString();
     input.step = step.toString();
+    const savedValue = localStorage.getItem('field-' + id);
+    if (savedValue !== null) {
+        input.value = savedValue;
+    } else {
+        input.value = defaultValue.toString();
+    }
     return input;
 }
 
@@ -156,6 +177,8 @@ export class Parameters {
         } else {
             this.lvlSelect.selectedIndex = 3;
         }
+        localStorage.setItem('field-lines-input', value.toString());
+        this.lvlSelect.saveValue();
         this.preview.setLevel(level);
     }
 
@@ -192,9 +215,8 @@ export class Parameters {
         );
         const lvlField = wrapSelectInField(this.lvlSelect.element, 'Level speed:');
 
-        this.linesInput = createNumberSelector('lines-input', 0, 429, 2);
+        this.linesInput = createNumberSelector('lines-input', 0, 429, 2, 30);
         const linesField = wrapSelectInField(this.linesInput, 'Lines:');
-        this.lines = 0;
 
         gameConfig.appendChild(pieceField);
         gameConfig.appendChild(lvlField);
@@ -203,13 +225,13 @@ export class Parameters {
         /// Model config
         this.lvlSelect.onchange = (_: Event, level: number) => {
             if (level == 18) {
-                this.lines = 0;
+                this.lines = 30;
             } else if (level == 19) {
-                this.lines = 130;
+                this.lines = 160;
             } else if (level == 29) {
-                this.lines = 230;
+                this.lines = 260;
             } else if (level == 39) {
-                this.lines = 330;
+                this.lines = 360;
             }
         }
 
