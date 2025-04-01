@@ -489,11 +489,11 @@ std::pair<size_t, FrameSequence> GetBestAdj(const std::vector<AdjInfor>& infor, 
     switch (mode) {
       case BestAdjMode::kWeightedTaps: val = {weight, (float)tap_mx, pre_taps, adj_prob}; break;
       case BestAdjMode::kPreAdjTaps: val = {pre_taps, (float)tap_mx, weight, adj_prob}; break;
-      case BestAdjMode::kWorstTaps: val = {(float)tap_mx, pre_taps, weight, adj_prob}; break;
-      case BestAdjMode::kAdjProb: val = {adj_prob, (float)tap_mx, pre_taps, weight}; break;
+      case BestAdjMode::kWorstTaps: val = {(float)tap_mx, weight, pre_taps, adj_prob}; break;
+      case BestAdjMode::kAdjProb: val = {adj_prob, (float)tap_mx, weight, pre_taps}; break;
       default: unreachable();
     }
-    if (val < mn) mn = val, index = i;
+    if (val < mn) mn = val, index = infor[i].index;
   }
   return {index, infor[index].seq};
 }

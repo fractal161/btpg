@@ -115,13 +115,13 @@ td.cell-probability {
 td.cell-piece {
   @apply px-1 bg-yellow-800;
 }
-td.cell-rank-1 {
+tr:nth-child(1) > td.cell-rank {
   @apply px-1 text-black bg-yellow-300;
 }
-td.cell-rank-2 {
+tr:nth-child(2) > td.cell-rank {
   @apply px-1 text-black bg-gray-300;
 }
-td.cell-rank-3 {
+tr:nth-child(3) > td.cell-rank {
   @apply px-1 bg-orange-800;
 }
 td.cell-rank {

@@ -34,5 +34,14 @@ std::vector<AdjItem> GetBestAdjModes(
   std::vector<AdjItem> ret;
   ret.reserve(ret_map.size());
   for (auto& [_, item] : ret_map) ret.push_back(std::move(item));
+  auto ModeInt = [](const std::string& str) {
+    if (str.find("LWT") != std::string::npos) return 0;
+    if (str.find("LMT") != std::string::npos) return 1;
+    if (str.find("LAP") != std::string::npos) return 2;
+    return -1;
+  };
+  std::sort(ret.begin(), ret.end(), [ModeInt](const AdjItem& a, const AdjItem& b) {
+    return ModeInt(a.modes) < ModeInt(b.modes);
+  });
   return ret;
 }

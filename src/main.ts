@@ -1,30 +1,19 @@
 import '../styles/style.css';
+import { Analysis } from './analysis';
 import { ExampleModel } from './models/example-model';
 import { Parameters } from './params';
 import { TetrisPreview } from './preview';
 import { TetrisState } from './tetris';
 
-const main = async () => {
-    const state = new TetrisState();
-
-    const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
-    const preview = new TetrisPreview(board, state);
-
-    const parameters = new Parameters(
-        document.getElementById('game-param-config')! as HTMLDivElement,
-        document.getElementById('model-param-config')! as HTMLDivElement,
-        preview,
-    );
+const initModel = async (state: TetrisState, parameters: Parameters, analysis: Analysis) => {
+    const evalButton = document.getElementById('eval') as HTMLButtonElement;
+    const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
+    const loadingText = document.getElementById('loading-text')! as HTMLSpanElement;
 
     const Sleep = async (ms: number) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
     };
 
-    const evalButton = document.getElementById('eval') as HTMLButtonElement;
-    const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
-    const loadingText = document.getElementById('loading-text')! as HTMLSpanElement;
-    evalButton.disabled = true;
-    loadingDiv.classList.remove('hidden');
     const model = await ExampleModel.create();
     evalButton.disabled = false;
     loadingDiv.classList.add('hidden');
@@ -36,7 +25,7 @@ const main = async () => {
             await Sleep(1); // make UI change visible
             const result = await model.run(state, parameters);
             await Sleep(1); // prevent double-click
-            console.log(result);
+            analysis.displayResult(result);
         } catch (e) {
             console.error(e);
         } finally {
@@ -44,5 +33,25 @@ const main = async () => {
             loadingDiv.classList.add('hidden');
         }
     });
+};
+
+const main = () => {
+    const state = new TetrisState();
+
+    const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
+    const preview = new TetrisPreview(board, state);
+
+    const parameters = new Parameters(
+        document.getElementById('game-param-config')! as HTMLDivElement,
+        document.getElementById('model-param-config')! as HTMLDivElement,
+        preview,
+    );
+    const analysis = new Analysis(state, preview);
+
+    const evalButton = document.getElementById('eval') as HTMLButtonElement;
+    const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
+    evalButton.disabled = true;
+    loadingDiv.classList.remove('hidden');
+    initModel(state, parameters, analysis);
 };
 main();

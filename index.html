@@ -55,25 +55,29 @@
           </div>
         </div>
         <div class="w-68 min-w-68">
-          <fieldset class="min-h-full">
+          <fieldset class="md:min-h-120">
             <legend>Analysis</legend>
             <div id="analysis-score" class="hidden">
               <div class="my-2">Scoring potential</div>
-              <table id="analysis-score-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+              <table id="analysis-score-table" class="analysis">
+                <tr><td class="cell-score"></td></tr>
+              </table>
             </div>
             <div id="analysis-hover" class="hidden">
-              <div class="my-2">Good hover positions</div>
-              <table id="analysis-hover-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+              <div id="analysis-hover-title" class="my-2">Good hover positions</div>
+              <table id="analysis-hover-table" class="analysis"></table>
             </div>
-            <div id="analysis-adjustments" class="hidden">
+            <div id="analysis-adjustment" class="hidden">
               <div class="my-2">Adjustments</div>
-              <table id="analysis-adjustments-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+              <table id="analysis-adjustment-table" class="analysis"></table>
             </div>
-            <div id="analysis-placements" class="hidden">
+            <div id="analysis-placement" class="hidden">
               <div class="my-2">Placements</div>
-              <table id="analysis-placements-table" class="w-full border-spacing-x-0 border-spacing-y-1"></table>
+              <table id="analysis-placement-table" class="analysis"></table>
             </div>
-            <div id="analysis-elapsed" class="text-sm mt-3 mb-2 hidden">✅ Analysis finished in 12345 ms.</div>
+            <div id="analysis-elapsed" class="text-sm mt-3 mb-2 hidden">
+              ✅ Analysis finished in <span id="analysis-elapsed-number"></span> ms.
+            </div>
           </fieldset>
         </div>
       </div>
