@@ -1,4 +1,28 @@
+import { Position } from '../wasm/tetris';
 import { BOARD_HEIGHT, BOARD_WIDTH, TetrisState } from './tetris';
+
+const BLOCK_TYPE = [0, 2, 1, 0, 2, 1, 0];
+const BLOCK_OFFSETS = [
+    [[[1, 0], [0, 0], [0, 1], [0, -1]], // T
+     [[1, 0], [0, 0], [-1, 0], [0, -1]],
+     [[0, -1], [0, 0], [0, 1], [-1, 0]],
+     [[1, 0], [0, 0], [0, 1], [-1, 0]]],
+    [[[0, -1], [0, 0], [0, 1], [1, 1]], // J
+     [[-1, 0], [0, 0], [1, -1], [1, 0]],
+     [[-1, -1], [0, -1], [0, 0], [0, 1]],
+     [[-1, 0], [-1, 1], [0, 0], [1, 0]]],
+    [[[0, -1], [0, 0], [1, 0], [1, 1]], // Z
+     [[-1, 1], [0, 0], [0, 1], [1, 0]]],
+    [[[0, -1], [0, 0], [1, -1], [1, 0]]], // O
+    [[[0, 0], [0, 1], [1, -1], [1, 0]], // S
+     [[-1, 0], [0, 0], [0, 1], [1, 1]]],
+    [[[0, -1], [0, 0], [0, 1], [1, -1]], // L
+     [[-1, -1], [-1, 0], [0, 0], [1, 0]],
+     [[-1, 1], [0, -1], [0, 0], [0, 1]],
+     [[-1, 0], [0, 0], [1, 0], [1, 1]]],
+    [[[0, -2], [0, -1], [0, 0], [0, 1]], // I
+     [[-2, 0], [-1, 0], [0, 0], [1, 0]]],
+];
 
 export class TetrisPreview {
     public drawMode: 'cell' | 'erase' | 'column' = 'cell';
@@ -175,6 +199,20 @@ export class TetrisPreview {
             for (let i = this.cursor.x; i < BOARD_HEIGHT; i++) {            
                 this.cells[i][this.cursor.y].classList.add('hover');
             }
+        }
+    }
+
+    public clearPreview() {
+        this.resetHover();
+    }
+
+    public previewPiece(piece: number, pos: Position) {
+        const block = BLOCK_OFFSETS[piece][pos.r];
+        for (let i = 0; i < block.length; i++) {
+            const x = pos.x + block[i][0];
+            const y = pos.y + block[i][1];
+            if (x < 0 || x >= BOARD_HEIGHT || y < 0 || y >= BOARD_WIDTH) continue;
+            this.cells[x][y].classList.add('hover');
         }
     }
 

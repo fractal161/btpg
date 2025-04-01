@@ -1,4 +1,4 @@
-import { TapSpeed } from '../wasm/tetris';
+import { Position, TapSpeed } from '../wasm/tetris';
 import { TetrisPreview } from './preview';
 import { module, PIECE_NAMES, TetrisState } from './tetris';
 
@@ -31,6 +31,20 @@ export class Analysis {
     private elapsedSection: HTMLDivElement;
     private elapsedNumber: HTMLSpanElement;
 
+    private mouseEnterHandler(e: Event) {
+        const target = e.target as HTMLTableCellElement;
+        if (target.getAttribute('data-x') === null) return;
+        const piece = parseInt(target.getAttribute('data-piece')!);
+        const r = parseInt(target.getAttribute('data-r')!);
+        const x = parseInt(target.getAttribute('data-x')!);
+        const y = parseInt(target.getAttribute('data-y')!);
+        this.preview.previewPiece(piece, {r: r, x: x, y: y});
+    }
+
+    private mouseLeaveHandler(e: Event) {
+        this.preview.clearPreview();
+    }
+
     constructor(
         private tetris: TetrisState,
         private preview: TetrisPreview,
@@ -56,6 +70,8 @@ export class Analysis {
             prob.classList.add('cell-probability');
             const placement = document.createElement('td');
             placement.classList.add('cell-placement');
+            placement.addEventListener('mouseenter', (e) => this.mouseEnterHandler(e));
+            placement.addEventListener('mouseleave', (e) => this.mouseLeaveHandler(e));
             const score = document.createElement('td');
             score.classList.add('cell-score');
             const row = document.createElement('tr');
@@ -70,6 +86,18 @@ export class Analysis {
 
     public displayResult(result: Record<string, any>) {
         const piece = result.query.piece;
+
+        const setPlacementCell = (placement: HTMLTableCellElement, position: Position, addEvent: Boolean = true) => {
+            placement.innerText = this.tetris.board.placementNotation(
+                piece, position.r, position.x, position.y);
+            placement.setAttribute('data-piece', piece.toString());
+            placement.setAttribute('data-r', position.r.toString());
+            placement.setAttribute('data-x', position.x.toString());
+            placement.setAttribute('data-y', position.y.toString());
+            if (!addEvent) return;
+            placement.addEventListener('mouseenter', (e) => this.mouseEnterHandler(e));
+            placement.addEventListener('mouseleave', (e) => this.mouseLeaveHandler(e));
+        };
 
         this.scoreSection.classList.remove('hidden');
         this.scoreCell.innerText = scoreText(result.eval[1], result.eval[2]);
@@ -87,8 +115,7 @@ export class Analysis {
                     const i = result.best_premove[0];
                     const placement = document.createElement('td');
                     placement.classList.add('cell-placement');
-                    placement.innerText = this.tetris.board.placementNotation(
-                        piece, i.position.r, i.position.x, i.position.y);
+                    setPlacementCell(placement, i.position);
                     const row = document.createElement('tr');
                     row.appendChild(placement);
                     this.hoverTable.appendChild(row);
@@ -100,8 +127,7 @@ export class Analysis {
                         modes.innerText = i.modes;
                         const placement = document.createElement('td');
                         placement.classList.add('cell-placement');
-                        placement.innerText = this.tetris.board.placementNotation(
-                            piece, i.position.r, i.position.x, i.position.y);
+                        setPlacementCell(placement, i.position);
                         const row = document.createElement('tr');
                         row.appendChild(modes);
                         row.appendChild(placement);
@@ -113,8 +139,7 @@ export class Analysis {
             for (let i = 0; i < 7; i++) {
                 const position = result.adj_best[i];
                 this.adjustmentRows[i][1].innerText = `${TRANSITION_PROBS[piece][i]}/32`;
-                this.adjustmentRows[i][2].innerText = this.tetris.board.placementNotation(
-                    piece, position.r, position.x, position.y);
+                setPlacementCell(this.adjustmentRows[i][2], position, false);
                 this.adjustmentRows[i][3].innerText = scoreText(result.adj_vals[i][1], result.adj_vals[i][2]);
             }
         } else {
@@ -123,14 +148,12 @@ export class Analysis {
             this.placementSection.classList.remove('hidden');
             this.placementTable.innerHTML = '';
             for (let i = 0; i < result.moves.length; i++) {
-                const position = result.moves[i].position;
                 const rank = document.createElement('td');
                 rank.classList.add('cell-rank');
                 rank.innerText = `${i + 1}`;
                 const placement = document.createElement('td');
                 placement.classList.add('cell-placement');
-                placement.innerText = this.tetris.board.placementNotation(
-                    piece, position.r, position.x, position.y);
+                setPlacementCell(placement, result.moves[i].position);
                 const prob = document.createElement('td');
                 prob.classList.add('cell-probability');
                 prob.innerText = `${(result.moves[i].prob * 100).toFixed(2)}%`;
