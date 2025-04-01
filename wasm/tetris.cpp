@@ -12,6 +12,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("getArray", &Board::ToByteBoard)
     .function("place", &Board::PlaceInplace)
     .function("clearLines", &Board::ClearLinesInplace)
+    .function("numFullLines", &Board::NumFullLines)
     .function("count", &Board::Count)
     .function("setCellFilled", &Board::SetCellFilled)
     .function("setCellEmpty", &Board::SetCellEmpty)

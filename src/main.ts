@@ -15,6 +15,9 @@ const initModel = async (state: TetrisState, parameters: Parameters, analysis: A
     };
 
     const model = await ExampleModel.create();
+    if (!model.isGPU) {
+        document.getElementById('message-no-webgpu')!.classList.remove('hidden');
+    }
     evalButton.disabled = false;
     loadingDiv.classList.add('hidden');
     loadingText.innerText = 'Evaluating...';
@@ -41,6 +44,9 @@ const main = () => {
     const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
     const preview = new TetrisPreview(board, state);
 
+    const errorFull = document.getElementById('message-full-line')! as HTMLDivElement;
+    const warnOdd = document.getElementById('message-odd-cells')! as HTMLDivElement;
+
     const parameters = new Parameters(
         document.getElementById('game-param-config')! as HTMLDivElement,
         document.getElementById('model-param-config')! as HTMLDivElement,
@@ -52,6 +58,25 @@ const main = () => {
     const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
     evalButton.disabled = true;
     loadingDiv.classList.remove('hidden');
+
+
+    preview.onChange = (state, isRelease) => {
+        if (!isRelease) return;
+        if (state.board.count() % 2 != 0) {
+            warnOdd.classList.remove('hidden');
+        } else {
+            warnOdd.classList.add('hidden');
+        }
+        console.log(state.board.numFullLines());
+        if (state.board.numFullLines() > 0) {
+            errorFull.classList.remove('hidden');
+            evalButton.disabled = true;
+        } else {
+            errorFull.classList.add('hidden');
+            evalButton.disabled = false;
+        }
+    };
+
     initModel(state, parameters, analysis);
 };
 main();

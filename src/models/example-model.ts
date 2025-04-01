@@ -31,19 +31,20 @@ function createONNXTensor(nestedArray: Array<any>, dataType = 'float32') {
 }
 
 export class ExampleModel implements Model {
-    private constructor(private session: InferenceSession) {}
+    private constructor(private session: InferenceSession, private _isGPU: Boolean) {}
+
+    public get isGPU() {
+        return this._isGPU;
+    }
 
     public static create = async (): Promise<ExampleModel> => {
         try {
             const session = await InferenceSession.create(onnxFile, {executionProviders: ['webgpu']});
-            return new ExampleModel(session);
-        } catch (e) {
-            // TODO: change to display a message in the UI
-            console.info('WebGPU not supported; falling back to WebAssembly');
-        }
+            return new ExampleModel(session, true);
+        } catch (e) {}
         try {
             const session = await InferenceSession.create(onnxFile, {executionProviders: ['wasm']});
-            return new ExampleModel(session);
+            return new ExampleModel(session, false);
         } catch (e) {
             console.error('Cannot initialize model');
             throw e;

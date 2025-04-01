@@ -26,6 +26,7 @@ const BLOCK_OFFSETS = [
 
 export class TetrisPreview {
     public drawMode: 'cell' | 'erase' | 'column' = 'cell';
+    public onChange: (state: TetrisState, isRelease: Boolean) => void = () => {};
     private drawing: boolean = false;
     private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
@@ -87,16 +88,17 @@ export class TetrisPreview {
         wrapper.appendChild(board);
 
         board.addEventListener('mousedown', this.mouseDown.bind(this));
-        board.addEventListener('mouseup', this.mouseUp.bind(this));
+        window.addEventListener('mouseup', this.mouseUp.bind(this));
         board.addEventListener('mouseleave', this.mouseLeave.bind(this));
         for (let i of board.querySelectorAll('td')) {
             i.addEventListener('mousemove', this.mouseMove.bind(this));
         }
-        document.addEventListener('keydown', this.keyDown.bind(this));
-        document.addEventListener('keyup', this.keyUp.bind(this));
+        window.addEventListener('keydown', this.keyDown.bind(this));
+        window.addEventListener('keyup', this.keyUp.bind(this));
     }
 
     private draw(cursorX: number, cursorY: number) {
+        let changed = false;
         const setCell = (x: number, y: number, value: boolean) => {
             if (x < 0 || x >= BOARD_HEIGHT || y < 0 || y >= BOARD_WIDTH) return;
             const cell = this.cells[x][y];
@@ -106,6 +108,7 @@ export class TetrisPreview {
             } else {
                 cell.classList = 'cell';
             }
+            if (this.tetris.getCell(x, y) !== value) changed = true;
             this.tetris.setCell(x, y, value);
         }
         if (this.drawMode === 'cell') {
@@ -120,6 +123,7 @@ export class TetrisPreview {
                 setCell(i, cursorY, true);
             }
         }
+        if (changed) this.onChange(this.tetris, false);
     }
 
     private mouseDown(e: MouseEvent): void {
@@ -142,6 +146,7 @@ export class TetrisPreview {
     private mouseUp(): void {
         this.drawing = false;
         this.resetHover();
+        this.onChange(this.tetris, true);
     }
 
     private bresenham(x0: number, y0: number, x1: number, y1: number) {

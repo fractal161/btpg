@@ -272,8 +272,8 @@ class alignas(32) Board {
 #pragma GCC diagnostic pop
     uint32_t linemask = (cols[0] | cols[1] | cols[2] | cols[3] | cols[4] |
                          cols[5] | cols[6] | cols[8] | cols[9] | cols[10]) & kColumnMask;
-    if (linemask == kColumnMask) return {0, *this};
     if (clear_mask) *clear_mask = ~linemask & kColumnMask;
+    if (linemask == kColumnMask) return {0, *this};
     int lines = 20 - popcount(linemask);
     for (int i = 0; i < 11; i++) {
       cols[i] = pext(cols[i], linemask) << lines | ((1 << lines) - 1);
@@ -283,6 +283,12 @@ class alignas(32) Board {
         cols[1] | (uint64_t)cols[5] << 22 | (uint64_t)cols[9] << 44,
         cols[2] | (uint64_t)cols[6] << 22 | (uint64_t)cols[10] << 44,
         cols[3]}};
+  }
+
+  constexpr int NumFullLines() const {
+    uint32_t clear_mask;
+    ClearLines(&clear_mask);
+    return popcount(clear_mask);
   }
 
   constexpr std::vector<int> ClearLinesInplace() {
