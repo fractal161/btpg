@@ -9,6 +9,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
   // board
   emscripten::class_<Board>("Board")
     .constructor(&CreateBoard, emscripten::allow_raw_pointers())
+    .class_function("fromBytes", &BoardFromBytes)
+    .function("copy", &BoardCopy)
     .function("getArray", &Board::ToByteBoard)
     .function("place", &Board::PlaceInplace)
     .function("clearLines", &Board::ClearLinesInplace)
@@ -18,6 +20,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
     .function("setCellEmpty", &Board::SetCellEmpty)
     .function("isCellFilled", &Board::IsCellFilled)
     .function("placementNotation", &Board::PlacementNotation)
+    .function("toBytes", &Board::ToByteVector)
     .function("toString", &Board::ToString);
 
   // state

@@ -59,6 +59,7 @@ export class ExampleModel implements Model {
             throw Error("session isn't ready!");
         }
         const params = {
+            board: tetris.board.copy(),
             piece: params_.piece,
             lines: params_.lines,
             tapSpeed: params_.tapSpeed,
@@ -68,7 +69,7 @@ export class ExampleModel implements Model {
         }; // prevent changing params while running
 
         const query = {
-            board: tetris.board.getArray(),
+            board: params.board.getArray(),
             piece: params.piece,
             lines: params.lines,
             tapSpeed: params.tapSpeed.value,
@@ -79,9 +80,8 @@ export class ExampleModel implements Model {
 
         const result: Record<string, any> = {game_over: false, isGPU: this.isGPU, query: query};
         const startTime = performance.now();
-        // console.log(tetris.board.toString(false, true, true));
         const state_pair = module.GetState(
-            tetris.board,
+            params.board,
             params.piece, // current piece
             -1,
             {r: 0, x: 0, y: 0}, // position
@@ -128,7 +128,7 @@ export class ExampleModel implements Model {
             result.moves = moves;
         } else if (move_mode == 3) {
             const adj_state = module.GetStateAllNextPieces(
-                tetris.board,
+                params.board,
                 params.piece,
                 best,
                 params.lines,
@@ -149,7 +149,7 @@ export class ExampleModel implements Model {
             const adj_vals = PIECE_NAMES.map((_, i) => [v[i], v[i+7], v[i+14]]);
 
             const best_premove = module.GetBestAdjModes(
-                tetris.board,
+                params.board,
                 params.piece,
                 params.lines,
                 params.tapSpeed,
@@ -163,6 +163,7 @@ export class ExampleModel implements Model {
         } else {
             throw Error("Invalid move mode");
         }
+        params.board.delete();
         const finishTime = performance.now();
         const elapsedTime = finishTime - startTime;
         result.elapsed_time = elapsedTime;

@@ -1,3 +1,4 @@
+import { Deque } from '@datastructures-js/deque';
 import { Position } from '../wasm/tetris';
 import { BOARD_HEIGHT, BOARD_WIDTH, TetrisState } from './tetris';
 
@@ -24,13 +25,25 @@ const BLOCK_OFFSETS = [
      [[-2, 0], [-1, 0], [0, 0], [1, 0]]],
 ];
 
+export enum ChangeMode {
+    DRAG = 'drag',
+    RELEASE = 'release',
+    PLACEMENT = 'placement',
+    UNDO = 'undo',
+}
+
 export class TetrisPreview {
     public drawMode: 'cell' | 'erase' | 'column' = 'cell';
-    public onChange: (state: TetrisState, isRelease: Boolean, placementInfor?: Record<string, any>) => void = () => {};
+    public onChange: (state: TetrisState, changeMode: ChangeMode, placementInfor?: Record<string, any>) => void = () => {};
     private drawing: boolean = false;
     private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
     private board: HTMLTableElement;
+    private history: Deque<Uint8Array> = new Deque<Uint8Array>;
+
+    get historySize() {
+        return this.history.size();
+    }
 
     constructor(
         wrapper: HTMLDivElement,
@@ -95,6 +108,63 @@ export class TetrisPreview {
         }
         window.addEventListener('keydown', this.keyDown.bind(this));
         window.addEventListener('keyup', this.keyUp.bind(this));
+
+        this.history.pushBack(this.getBoardState());
+    }
+
+    private getBoardState() {
+        const state = new Uint8Array(50);
+        let idx = 0;
+        let cur = 0;
+        for (let i = 0; i < BOARD_HEIGHT; i++) {
+            for (let j = 0; j < BOARD_WIDTH; j++, idx++) {
+                const cellClass = this.cells[i][j].classList;
+                let val = 0;
+                if (cellClass.contains('filled')) {
+                    if (cellClass.contains('block-2')) val = 2;
+                    else if (cellClass.contains('block-3')) val = 3;
+                    else val = 1;
+                }
+                cur |= val << ((idx & 3) * 2);
+                if ((idx & 3) === 3) {
+                    state[idx >> 2] = cur;
+                    cur = 0;
+                }
+            }
+        }
+        return state;
+    }
+
+    private loadBoardState(state: Uint8Array) {
+        let idx = 0;
+        for (let i = 0; i < BOARD_HEIGHT; i++) {
+            for (let j = 0; j < BOARD_WIDTH; j++, idx++) {
+                const val = state[idx >> 2] >> ((idx & 3) * 2) & 3;
+                if (val === 0) {
+                    this.cells[i][j].classList = 'cell';
+                    this.tetris.setCell(i, j, false);
+                } else {
+                    this.cells[i][j].classList = 'cell filled block-' + val;
+                    this.tetris.setCell(i, j, true);
+                }
+            }
+        }
+    }
+
+    private _onChange(state: TetrisState, changeMode: ChangeMode, placementInfor?: Record<string, any>) {
+        if (changeMode === ChangeMode.RELEASE || changeMode === ChangeMode.PLACEMENT) {
+            this.history.pushBack(this.getBoardState());
+            if (this.history.size() > 1000) this.history.popFront();
+        }
+        this.onChange(state, changeMode, placementInfor);
+    }
+
+    public undo() {
+        if (this.history.size() <= 1) return;
+        this.history.popBack();
+        const state = this.history.back();
+        this.loadBoardState(state);
+        this._onChange(this.tetris, ChangeMode.UNDO);
     }
 
     private draw(cursorX: number, cursorY: number) {
@@ -123,7 +193,7 @@ export class TetrisPreview {
                 setCell(i, cursorY, true);
             }
         }
-        if (changed) this.onChange(this.tetris, false, undefined);
+        if (changed) this._onChange(this.tetris, ChangeMode.DRAG);
     }
 
     private mouseDown(e: MouseEvent): void {
@@ -147,7 +217,7 @@ export class TetrisPreview {
         if (!this.drawing) return;
         this.drawing = false;
         this.resetHover();
-        this.onChange(this.tetris, true, undefined);
+        this._onChange(this.tetris, ChangeMode.RELEASE);
     }
 
     private bresenham(x0: number, y0: number, x1: number, y1: number) {
@@ -252,18 +322,21 @@ export class TetrisPreview {
                 this.cells[dst][j].classList = 'cell';
             }
         }
-        this.onChange(this.tetris, false, {lineIncrement: clearedLines.length, piece: next});
+        this._onChange(this.tetris, ChangeMode.PLACEMENT, {lineIncrement: clearedLines.length, piece: next});
     }
 
-    public keyDown(e: KeyboardEvent): void {
+    private keyDown(e: KeyboardEvent): void {
         if (this.drawing) return;
         if (e.key === 'Shift') {
             this.drawMode = 'column';
         }
         this.resetHover();
+        if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+            this.undo();
+        }
     }
 
-    public keyUp(e: KeyboardEvent): void {
+    private keyUp(e: KeyboardEvent): void {
         if (this.drawing) return;
         if (e.key === 'Shift') {
             this.drawMode = 'cell';

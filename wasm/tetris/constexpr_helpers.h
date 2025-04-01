@@ -116,6 +116,37 @@ constexpr int clz(T a) {
 #endif
 }
 
+template <class T>
+constexpr T BytesToInt(const uint8_t x[]) {
+  static_assert(
+      std::is_same<T, uint16_t>::value ||
+      std::is_same<T, uint32_t>::value ||
+      std::is_same<T, uint64_t>::value,
+      "not implemented");
+}
+template <class T>
+constexpr void IntToBytes(T x, uint8_t ret[]) {
+  static_assert(
+      std::is_same<T, uint16_t>::value ||
+      std::is_same<T, uint32_t>::value ||
+      std::is_same<T, uint64_t>::value,
+      "not implemented");
+}
+
+template <>
+constexpr uint64_t BytesToInt(const uint8_t x[]) {
+  using U = uint64_t;
+  // compiler only optimized it if expanded out like this
+  return (U)x[0]       | (U)x[1] << 8  | (U)x[2] << 16 | (U)x[3] << 24 |
+         (U)x[4] << 32 | (U)x[5] << 40 | (U)x[6] << 48 | (U)x[7] << 56;
+}
+
+template <>
+constexpr void IntToBytes(uint64_t x, uint8_t ret[]) {
+  ret[0] = x;       ret[1] = x >> 8;  ret[2] = x >> 16; ret[3] = x >> 24;
+  ret[4] = x >> 32; ret[5] = x >> 40; ret[6] = x >> 48; ret[7] = x >> 56;
+}
+
 #define DO_PIECE_CASE(piece) \
   switch (piece) { \
     ONE_CASE(0) ONE_CASE(1) ONE_CASE(2) ONE_CASE(3) ONE_CASE(4) ONE_CASE(5) ONE_CASE(6) \

@@ -19,6 +19,7 @@
     "vite-plugin-static-copy": "^1.0.1"
   },
   "dependencies": {
+    "@datastructures-js/deque": "^1.0.5",
     "@tailwindcss/vite": "^4.0.17",
     "onnxruntime-web": "^1.21.0",
     "tailwindcss": "^4.0.17"

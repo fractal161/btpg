@@ -2,7 +2,7 @@ import '../styles/style.css';
 import { Analysis } from './analysis';
 import { ExampleModel } from './models/example-model';
 import { Parameters } from './params';
-import { TetrisPreview } from './preview';
+import { ChangeMode, TetrisPreview } from './preview';
 import { TetrisState } from './tetris';
 
 const state = new TetrisState();
@@ -11,6 +11,7 @@ const preview = new TetrisPreview(board, state);
 const parameters = new Parameters(preview);
 const analysis = new Analysis(state, preview);
 const evalButton = document.getElementById('eval') as HTMLButtonElement;
+const undoButton = document.getElementById('undo') as HTMLButtonElement;
 const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
 let model: ExampleModel | undefined = undefined;
 let evaluating: boolean = false;
@@ -54,6 +55,18 @@ const initModel = async () => {
     loadingDiv.classList.add('hidden');
     loadingText.innerText = 'Evaluating...';
     evalButton.addEventListener('click', evaluate);
+
+    // preload images
+    const images = document.createElement('div');
+    images.classList.add('hidden');
+    for (let i = 0; i < 10; i++) {
+        for (let j = 1; j <= 3; j++) {
+            const img = document.createElement('img');
+            img.src = `/btpg/assets/cells/${i}-${j}.svg`;
+            images.appendChild(img);
+        }
+    }
+    document.body.appendChild(images);
 };
 
 const main = () => {
@@ -63,9 +76,16 @@ const main = () => {
     evalButton.disabled = true;
     loadingDiv.classList.remove('hidden');
 
-    preview.onChange = (state, isRelease, placementInfor) => {
+    undoButton.addEventListener('click', () => {
+        preview.undo();
+    });
+
+    preview.onChange = (state, changeMode, placementInfor) => {
         analysis.hideAll();
-        if (placementInfor !== undefined) {
+        if (changeMode == ChangeMode.PLACEMENT) {
+            if (placementInfor === undefined) {
+                throw new Error('placementInfor is undefined');
+            }
             if (placementInfor.piece !== undefined) {
                 parameters.setPiece(placementInfor.piece);
             } else {
@@ -74,7 +94,7 @@ const main = () => {
             parameters.addLines(placementInfor.lineIncrement);
             if (parameters.autoEval) evaluate();
         }
-        if (!isRelease) return;
+        if (changeMode == ChangeMode.DRAG) return;
         const count = state.board.count();
         if (count % 2 != 0) {
             warnOdd.classList.remove('hidden');
@@ -89,6 +109,7 @@ const main = () => {
             errorFull.classList.add('hidden');
             evalButton.disabled = false;
         }
+        undoButton.disabled = preview.historySize == 1;
     };
     initModel();
 };
