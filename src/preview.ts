@@ -1,6 +1,7 @@
 import { Deque } from '@datastructures-js/deque';
 import { Position } from '../wasm/tetris';
 import { BOARD_HEIGHT, BOARD_WIDTH, TetrisState } from './tetris';
+import * as base64js from 'base64-js';
 
 const BLOCK_TYPE = [1, 3, 2, 1, 3, 2, 1];
 const BLOCK_OFFSETS = [
@@ -30,6 +31,7 @@ export enum ChangeMode {
     RELEASE = 'release',
     PLACEMENT = 'placement',
     UNDO = 'undo',
+    LOAD = 'load',
 }
 
 export class TetrisPreview {
@@ -109,6 +111,11 @@ export class TetrisPreview {
         window.addEventListener('keydown', this.keyDown.bind(this));
         window.addEventListener('keyup', this.keyUp.bind(this));
 
+        const savedState = localStorage.getItem('tetris-preview-state');
+        if (savedState) {
+            this.loadBoardState(base64js.toByteArray(savedState));
+            this._onChange(tetris, ChangeMode.LOAD);
+        }
         this.history.pushBack(this.getBoardState());
     }
 
@@ -153,7 +160,9 @@ export class TetrisPreview {
 
     private _onChange(state: TetrisState, changeMode: ChangeMode, placementInfor?: Record<string, any>) {
         if (changeMode === ChangeMode.RELEASE || changeMode === ChangeMode.PLACEMENT) {
-            this.history.pushBack(this.getBoardState());
+            const state = this.getBoardState();
+            localStorage.setItem('tetris-preview-state', base64js.fromByteArray(state));
+            this.history.pushBack(state);
             if (this.history.size() > 1000) this.history.popFront();
         }
         this.onChange(state, changeMode, placementInfor);
