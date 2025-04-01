@@ -5,7 +5,8 @@
 // https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
 
 import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
-import onnxFile from '../../agents/model.onnx';
+import onnxNormal from '../../agents/model-normal.onnx';
+import onnxAggro from '../../agents/model-aggro.onnx';
 import { Model } from '../model';
 import { module, PIECE_NAMES, Placement, TetrisState } from '../tetris';
 import { Parameters } from '../params';
@@ -31,7 +32,7 @@ function createONNXTensor(nestedArray: Array<any>, dataType = 'float32') {
 }
 
 export class ExampleModel implements Model {
-    private constructor(private session: InferenceSession, private _isGPU: Boolean) {}
+    private constructor(private sessions: Array<InferenceSession>, private _isGPU: Boolean) {}
 
     public get isGPU() {
         return this._isGPU;
@@ -39,22 +40,32 @@ export class ExampleModel implements Model {
 
     public static create = async (): Promise<ExampleModel> => {
         try {
-            const session = await InferenceSession.create(onnxFile, {executionProviders: ['webgpu']});
-            return new ExampleModel(session, true);
+            const session0 = await InferenceSession.create(onnxNormal, {executionProviders: ['webgpu']});
+            const session1 = await InferenceSession.create(onnxAggro, {executionProviders: ['webgpu']});
+            return new ExampleModel([session0, session1], true);
         } catch (e) {}
         try {
-            const session = await InferenceSession.create(onnxFile, {executionProviders: ['wasm']});
-            return new ExampleModel(session, false);
+            const session0 = await InferenceSession.create(onnxNormal, {executionProviders: ['wasm']});
+            const session1 = await InferenceSession.create(onnxAggro, {executionProviders: ['wasm']});
+            return new ExampleModel([session0, session1], false);
         } catch (e) {
             console.error('Cannot initialize model');
             throw e;
         }
     };
 
-    public run = async (tetris: TetrisState, params: Parameters) => {
-        if (this.session === undefined) {
+    public run = async (tetris: TetrisState, params_: Parameters) => {
+        if (this.sessions === undefined) {
             throw Error("session isn't ready!");
         }
+        const params = {
+            piece: params_.piece,
+            lines: params_.lines,
+            tapSpeed: params_.tapSpeed,
+            reactionTime: params_.reactionTime,
+            aggression: params_.aggression,
+            model: params_.model,
+        }; // prevent changing params while running
 
         const query = {
             board: tetris.board.getArray(),
@@ -63,6 +74,7 @@ export class ExampleModel implements Model {
             tapSpeed: params.tapSpeed.value,
             reactionTime: params.reactionTime,
             aggression: params.aggression,
+            model: params.model,
         };
 
         const result: Record<string, any> = {game_over: false, query: query};
@@ -96,7 +108,7 @@ export class ExampleModel implements Model {
         };
 
         // feed inputs and run
-        const results = await this.session.run(feeds);
+        const results = await this.sessions[params.model].run(feeds);
         const pi = results.pi.data;
         const pi_rank = results.pi_rank.data;
         const v = results.v.data;
@@ -130,7 +142,7 @@ export class ExampleModel implements Model {
                 move_meta: createONNXTensor(adj_state.move_meta),
                 meta_int: createONNXTensor(adj_state.meta_int, 'int32'),
             };
-            const adj_results = await this.session.run(adj_feeds);
+            const adj_results = await this.sessions[params.model].run(adj_feeds);
             const pi_rank = adj_results.pi_rank.data;
             const v = adj_results.v.data;
             const adj_best = PIECE_NAMES.map((_, i) => new Placement(Number(pi_rank[i * 800])));

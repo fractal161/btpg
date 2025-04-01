@@ -112,6 +112,7 @@ export class Parameters {
     private pieceSelect: Select<number>;
     private lvlSelect: Select<number>;
     private linesInput: HTMLInputElement;
+    private modelSelect: Select<number>;
     private hzSelect: Select<TapSpeed>;
     private reactionSelect: Select<number>;
     private aggressionSelect: Select<number>;
@@ -121,6 +122,9 @@ export class Parameters {
     }
     get level(): number {
         return this.lvlSelect.value;
+    }
+    get model(): number {
+        return this.modelSelect.value;
     }
     get tapSpeed(): TapSpeed {
         return this.hzSelect.value;
@@ -221,6 +225,14 @@ export class Parameters {
         this.linesInput.addEventListener('change', lineChange);
 
         /// Model config
+        this.modelSelect = new Select(
+            'model-select',
+            [0, 1],
+            ['Normal', 'Aggro'],
+            0,
+        );
+        const modelField = wrapSelectInField(this.modelSelect.element, 'Model:');
+
         this.hzSelect = new Select(
             'hz-select',
             [module.TapSpeed.kTap10Hz, module.TapSpeed.kTap12Hz, module.TapSpeed.kTap15Hz,
@@ -249,6 +261,7 @@ export class Parameters {
         );
         const aggroField = wrapSelectInField(this.aggressionSelect.element, 'Aggression:');
 
+        modelConfig.appendChild(modelField);
         modelConfig.appendChild(hzField);
         modelConfig.appendChild(reactionField);
         modelConfig.appendChild(aggroField);
