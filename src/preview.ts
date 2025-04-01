@@ -159,11 +159,16 @@ export class TetrisPreview {
     }
 
     private _onChange(state: TetrisState, changeMode: ChangeMode, placementInfor?: Record<string, any>) {
-        if (changeMode === ChangeMode.RELEASE || changeMode === ChangeMode.PLACEMENT) {
+        if (changeMode === ChangeMode.RELEASE || changeMode === ChangeMode.PLACEMENT || changeMode === ChangeMode.UNDO) {
             const state = this.getBoardState();
             localStorage.setItem('tetris-preview-state', base64js.fromByteArray(state));
-            this.history.pushBack(state);
-            if (this.history.size() > 1000) this.history.popFront();
+            if (changeMode !== ChangeMode.UNDO) {
+                // weird but only built-in way of comparing array equality
+                if (indexedDB.cmp(state, this.history.back()) !== 0) {
+                    this.history.pushBack(state);
+                }
+                if (this.history.size() > 1000) this.history.popFront();
+            }
         }
         this.onChange(state, changeMode, placementInfor);
     }
