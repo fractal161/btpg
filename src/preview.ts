@@ -1,7 +1,7 @@
 import { Position } from '../wasm/tetris';
 import { BOARD_HEIGHT, BOARD_WIDTH, TetrisState } from './tetris';
 
-const BLOCK_TYPE = [0, 2, 1, 0, 2, 1, 0];
+const BLOCK_TYPE = [1, 3, 2, 1, 3, 2, 1];
 const BLOCK_OFFSETS = [
     [[[1, 0], [0, 0], [0, 1], [0, -1]], // T
      [[1, 0], [0, 0], [-1, 0], [0, -1]],
@@ -26,7 +26,7 @@ const BLOCK_OFFSETS = [
 
 export class TetrisPreview {
     public drawMode: 'cell' | 'erase' | 'column' = 'cell';
-    public onChange: (state: TetrisState, isRelease: Boolean) => void = () => {};
+    public onChange: (state: TetrisState, isRelease: Boolean, lineIncrement: number | undefined) => void = () => {};
     private drawing: boolean = false;
     private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
@@ -104,7 +104,7 @@ export class TetrisPreview {
             const cell = this.cells[x][y];
             if (value) {
                 // random block 1-3
-                cell.classList = 'cell block-' + Math.floor(Math.random() * 3 + 1);
+                cell.classList = 'cell filled block-' + Math.floor(Math.random() * 3 + 1);
             } else {
                 cell.classList = 'cell';
             }
@@ -123,7 +123,7 @@ export class TetrisPreview {
                 setCell(i, cursorY, true);
             }
         }
-        if (changed) this.onChange(this.tetris, false);
+        if (changed) this.onChange(this.tetris, false, undefined);
     }
 
     private mouseDown(e: MouseEvent): void {
@@ -144,9 +144,10 @@ export class TetrisPreview {
     }
 
     private mouseUp(): void {
+        if (!this.drawing) return;
         this.drawing = false;
         this.resetHover();
-        this.onChange(this.tetris, true);
+        this.onChange(this.tetris, true, undefined);
     }
 
     private bresenham(x0: number, y0: number, x1: number, y1: number) {
@@ -217,8 +218,38 @@ export class TetrisPreview {
             const x = pos.x + block[i][0];
             const y = pos.y + block[i][1];
             if (x < 0 || x >= BOARD_HEIGHT || y < 0 || y >= BOARD_WIDTH) continue;
-            this.cells[x][y].classList.add('hover');
+            this.cells[x][y].classList = 'cell hover block-' + BLOCK_TYPE[piece];
         }
+    }
+
+    public placePiece(piece: number, pos: Position) {
+        const block = BLOCK_OFFSETS[piece][pos.r];
+        for (let i = 0; i < block.length; i++) {
+            const x = pos.x + block[i][0];
+            const y = pos.y + block[i][1];
+            if (x < 0 || x >= BOARD_HEIGHT || y < 0 || y >= BOARD_WIDTH) continue;
+            this.cells[x][y].classList = 'cell filled block-' + BLOCK_TYPE[piece];
+            this.tetris.setCell(x, y, true);
+        }
+        const clearedLines = this.tetris.board.clearLines();
+        let src = 19;
+        let dst = 19;
+        let i = clearedLines.length - 1;
+        while (src >= 0) {
+            while (i >= 0 && clearedLines[i] === src) {
+                i--;
+                src--;
+            }
+            if (src < 0) break;
+            if (src !== dst) {
+                for (let j = 0; j < BOARD_WIDTH; j++) {
+                    this.cells[dst][j].classList = this.cells[src][j].classList.toString();
+                }
+            }
+            src--;
+            dst--;
+        }
+        this.onChange(this.tetris, false, clearedLines.length);
     }
 
     public keyDown(e: KeyboardEvent): void {

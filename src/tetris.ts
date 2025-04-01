@@ -15,6 +15,15 @@ export enum Piece {
     I = 6,
 };
 export const PIECE_NAMES = ['T', 'J', 'Z', 'O', 'S', 'L', 'I'];
+export const TRANSITION_PROBS = [
+    [1, 5, 6, 5, 5, 5, 5],
+    [6, 1, 5, 5, 5, 5, 5],
+    [5, 6, 1, 5, 5, 5, 5],
+    [5, 5, 5, 2, 5, 5, 5],
+    [5, 5, 5, 5, 2, 5, 5],
+    [6, 5, 5, 5, 5, 1, 5],
+    [5, 5, 5, 5, 6, 5, 1],
+];
 
 // coordinate system is right+down, i.e. lower-indexed rows are higher up
 export class TetrisState {

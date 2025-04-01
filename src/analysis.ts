@@ -1,21 +1,18 @@
 import { Position, TapSpeed } from '../wasm/tetris';
 import { TetrisPreview } from './preview';
-import { module, PIECE_NAMES, TetrisState } from './tetris';
-
-const TRANSITION_PROBS = [
-    [1, 5, 6, 5, 5, 5, 5],
-    [6, 1, 5, 5, 5, 5, 5],
-    [5, 6, 1, 5, 5, 5, 5],
-    [5, 5, 5, 2, 5, 5, 5],
-    [5, 5, 5, 5, 2, 5, 5],
-    [6, 5, 5, 5, 5, 1, 5],
-    [5, 5, 5, 5, 6, 5, 1],
-];
+import { module, PIECE_NAMES, TRANSITION_PROBS, TetrisState } from './tetris';
 
 function scoreText(avg: number, dev: number) {
     const avgInt = Math.round(avg * 100);
     const devInt = Math.round(dev * 100);
     return `${avgInt}k ± ${devInt}k`;
+}
+
+function getPosition(el: HTMLTableCellElement) {
+    const x = parseInt(el.getAttribute('data-x')!);
+    const y = parseInt(el.getAttribute('data-y')!);
+    const r = parseInt(el.getAttribute('data-r')!);
+    return {x: x, y: y, r: r};
 }
 
 export class Analysis {
@@ -35,14 +32,18 @@ export class Analysis {
         const target = e.target as HTMLTableCellElement;
         if (target.getAttribute('data-x') === null) return;
         const piece = parseInt(target.getAttribute('data-piece')!);
-        const r = parseInt(target.getAttribute('data-r')!);
-        const x = parseInt(target.getAttribute('data-x')!);
-        const y = parseInt(target.getAttribute('data-y')!);
-        this.preview.previewPiece(piece, {r: r, x: x, y: y});
+        this.preview.previewPiece(piece, getPosition(target));
     }
 
-    private mouseLeaveHandler(e: Event) {
+    private mouseLeaveHandler(_: Event) {
         this.preview.clearPreview();
+    }
+
+    private clickPlaceHandler(e: Event) {
+        const target = e.target as HTMLTableCellElement;
+        if (target.getAttribute('data-x') === null) return;
+        const piece = parseInt(target.getAttribute('data-piece')!);
+        this.preview.placePiece(piece, getPosition(target));
     }
 
     constructor(
@@ -70,8 +71,9 @@ export class Analysis {
             prob.classList.add('cell-probability');
             const placement = document.createElement('td');
             placement.classList.add('cell-placement');
-            placement.addEventListener('mouseenter', (e) => this.mouseEnterHandler(e));
-            placement.addEventListener('mouseleave', (e) => this.mouseLeaveHandler(e));
+            placement.addEventListener('mouseenter', this.mouseEnterHandler.bind(this));
+            placement.addEventListener('mouseleave', this.mouseLeaveHandler.bind(this));
+            placement.addEventListener('click', this.clickPlaceHandler.bind(this));
             const score = document.createElement('td');
             score.classList.add('cell-score');
             const row = document.createElement('tr');
@@ -87,7 +89,9 @@ export class Analysis {
     public displayResult(result: Record<string, any>) {
         const piece = result.query.piece;
 
-        const setPlacementCell = (placement: HTMLTableCellElement, position: Position, addEvent: Boolean = true) => {
+        const setPlacementCell = (
+                placement: HTMLTableCellElement, position: Position,
+                addEvent: Boolean = true, addClickEvent: Boolean = false) => {
             placement.innerText = this.tetris.board.placementNotation(
                 piece, position.r, position.x, position.y);
             placement.setAttribute('data-piece', piece.toString());
@@ -95,8 +99,11 @@ export class Analysis {
             placement.setAttribute('data-x', position.x.toString());
             placement.setAttribute('data-y', position.y.toString());
             if (!addEvent) return;
-            placement.addEventListener('mouseenter', (e) => this.mouseEnterHandler(e));
-            placement.addEventListener('mouseleave', (e) => this.mouseLeaveHandler(e));
+            placement.addEventListener('mouseenter', this.mouseEnterHandler.bind(this));
+            placement.addEventListener('mouseleave', this.mouseLeaveHandler.bind(this));
+            if (addClickEvent) {
+                placement.addEventListener('click', this.clickPlaceHandler.bind(this));
+            }
         };
 
         this.scoreSection.classList.remove('hidden');
@@ -153,7 +160,7 @@ export class Analysis {
                 rank.innerText = `${i + 1}`;
                 const placement = document.createElement('td');
                 placement.classList.add('cell-placement');
-                setPlacementCell(placement, result.moves[i].position);
+                setPlacementCell(placement, result.moves[i].position, true, true);
                 const prob = document.createElement('td');
                 prob.classList.add('cell-probability');
                 prob.innerText = `${(result.moves[i].prob * 100).toFixed(2)}%`;
@@ -164,5 +171,13 @@ export class Analysis {
                 this.placementTable.appendChild(row);
             }
         }
+    }
+
+    public hideAll() {
+        this.scoreSection.classList.add('hidden');
+        this.hoverSection.classList.add('hidden');
+        this.adjustmentSection.classList.add('hidden');
+        this.placementSection.classList.add('hidden');
+        this.elapsedSection.classList.add('hidden');
     }
 };

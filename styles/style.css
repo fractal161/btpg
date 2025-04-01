@@ -246,11 +246,11 @@ td.cell-score {
   background-image: url(./assets/cells/9-3.svg);
 }
 
-.board .cell.block-1 > .block, .board .cell.block-2 > .block, .board .cell.block-3 > .block {
+.board .cell.filled > .block {
   opacity: 1;
 }
 .board .cell:hover > .block, .board .cell.hover > .block {
-  opacity: 0.5;
+  opacity: 0.5 !important;
 }
 .row-mark, .col-mark {
   line-height: 1;

@@ -1,6 +1,6 @@
 import { TapSpeed } from '../wasm/tetris';
 import { TetrisPreview } from './preview';
-import { module, PIECE_NAMES } from './tetris';
+import { module, PIECE_NAMES, TRANSITION_PROBS } from './tetris';
 
 class Select<T> {
     private select: HTMLSelectElement;
@@ -100,11 +100,10 @@ export class Parameters {
         return this.aggressionSelect.value;
     }
 
-    private _lines: number = 0;
-    get lines(): number {
-        return this._lines;
-    }
-    set lines(value: number) {
+    private setLines(value: number, checkParity: Boolean = true) {
+        if (checkParity) {
+            value = (value & 0xfffffffe) + (this.linesInput.min == '1' ? 1 : 0);
+        }
         this.linesInput.value = value.toString();
         this._lines = value;
         let level = 19 + ~~((value - 130) / 10);
@@ -119,6 +118,14 @@ export class Parameters {
             this.lvlSelect.selectedIndex = 3;
         }
         this.preview.setLevel(level);
+    }
+
+    private _lines: number = 0;
+    get lines(): number {
+        return this._lines;
+    }
+    set lines(value: number) {
+        this.setLines(value);
     }
 
     constructor(
@@ -164,11 +171,16 @@ export class Parameters {
             }
         }
 
+        const lineInput = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.setLines(parseInt(target.value), false);
+        }
         const lineChange = (e: Event) => {
             const target = e.target as HTMLInputElement;
-            this.lines = parseInt(target.value);
+            this.setLines(parseInt(target.value), true);
         }
-        this.linesInput.addEventListener('input', lineChange);
+        this.linesInput.addEventListener('input', lineInput);
+        this.linesInput.addEventListener('change', lineChange);
 
         /// Model config
         this.hzSelect = new Select(
@@ -202,5 +214,33 @@ export class Parameters {
         this.modelConfig.appendChild(hzField);
         this.modelConfig.appendChild(reactionField);
         this.modelConfig.appendChild(aggroField);
+    }
+
+    public setPiece(piece: number) {
+        this.pieceSelect.selectedIndex = piece;
+    }
+
+    public generateRandomPiece() {
+        const transition_probs = TRANSITION_PROBS[this.piece];
+        const random = Math.random() * 32;
+        let sum = 0;
+        for (let i = 0; i < transition_probs.length; i++) {
+            sum += transition_probs[i];
+            if (random < sum) {
+                this.setPiece(i);
+                return;
+            }
+        }
+        this.setPiece(0);
+    }
+
+    public changeLineMin(isOdd: Boolean) {
+        this.linesInput.min = isOdd ? '1' : '0';
+        this.linesInput.value = ((this.lines & 0xfffffffe) + (isOdd ? 1 : 0)).toString();
+    }
+
+    public addLines(lines: number) {
+        this.linesInput.min = (this.lines + lines) % 2 ? '1' : '0';
+        this.lines = Math.min(429, this.lines + lines);
     }
 };
