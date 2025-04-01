@@ -16,6 +16,7 @@ function getPosition(el: HTMLTableCellElement) {
 }
 
 export class Analysis {
+    private gameOverSection: HTMLDivElement;
     private scoreSection: HTMLDivElement;
     private scoreCell: HTMLTableCellElement;
     private hoverSection: HTMLDivElement;
@@ -51,6 +52,7 @@ export class Analysis {
         private tetris: TetrisState,
         private preview: TetrisPreview,
     ) {
+        this.gameOverSection = document.getElementById('analysis-game-over')! as HTMLDivElement;
         this.scoreSection = document.getElementById('analysis-score')! as HTMLDivElement;
         this.scoreCell = document.getElementById('analysis-score-table')!.querySelector('td')!;
         this.hoverSection = document.getElementById('analysis-hover')! as HTMLDivElement;
@@ -108,10 +110,20 @@ export class Analysis {
             }
         };
 
-        this.scoreSection.classList.remove('hidden');
-        this.scoreCell.innerText = scoreText(result.eval[1], result.eval[2]);
         this.elapsedSection.classList.remove('hidden');
         this.elapsedNumber.innerText = `${Math.round(result.elapsed_time)}`;
+        if (result.game_over) {
+            this.gameOverSection.classList.remove('hidden');
+            this.scoreSection.classList.add('hidden');
+            this.hoverSection.classList.add('hidden');
+            this.adjustmentSection.classList.add('hidden');
+            this.placementSection.classList.add('hidden');
+            return;
+        }
+
+        this.gameOverSection.classList.add('hidden');
+        this.scoreSection.classList.remove('hidden');
+        this.scoreCell.innerText = scoreText(result.eval[1], result.eval[2]);
         if (result.adjustment) {
             this.placementSection.classList.add('hidden');
             if (result.query.reactionTime == 0) {
@@ -176,6 +188,7 @@ export class Analysis {
     }
 
     public hideAll() {
+        this.gameOverSection.classList.add('hidden');
         this.scoreSection.classList.add('hidden');
         this.hoverSection.classList.add('hidden');
         this.adjustmentSection.classList.add('hidden');

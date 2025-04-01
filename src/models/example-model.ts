@@ -65,6 +65,7 @@ export class ExampleModel implements Model {
             aggression: params.aggression,
         };
 
+        const result: Record<string, any> = {game_over: false, query: query};
         const startTime = performance.now();
         // console.log(tetris.board.toString(false, true, true));
         const state_pair = module.GetState(
@@ -77,6 +78,13 @@ export class ExampleModel implements Model {
             params.reactionTime,
             params.aggression);
         const state = state_pair.state;
+        if (state.board.length == 0) {
+            const finishTime = performance.now();
+            const elapsedTime = finishTime - startTime;
+            result.elapsed_time = elapsedTime;
+            result.game_over = true;
+            return result;
+        }
 
         // prepare feeds. use model input names as keys.
         const feeds = {
@@ -93,9 +101,9 @@ export class ExampleModel implements Model {
         const pi_rank = results.pi_rank.data;
         const v = results.v.data;
         const best = new Placement(Number(pi_rank[0]));
+        result.eval = Array.from(v);
 
         const move_mode = state_pair.move_map[best.r][best.x][best.y];
-        const result: Record<string, any> = {query: query, eval: Array.from(v)};
         if (move_mode == 1) {
             const moves = [{prob: pi[Number(pi_rank[0])], position: best}];
             for (let i = 1; i < 5; i++) {

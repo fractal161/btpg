@@ -1,6 +1,8 @@
 #include "state.h"
 
-StateDetail GetState(
+namespace {
+
+StateDetail GetState_(
     const Board& board, int now_piece, int next_piece, const Position& premove,
     int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
   State state = {};
@@ -116,6 +118,20 @@ StateDetail GetState(
   MultiState ret;
   ret.from_state(std::move(state));
   return {ret, moves, move_map};
+}
+
+} // namespace
+
+StateDetail GetState(
+    const Board& board, int now_piece, int next_piece, const Position& premove,
+    int lines, TapSpeed tap_speed, int adj_delay, int aggression_level) {
+  try {
+    return GetState_(
+        board, now_piece, next_piece, premove,
+        lines, tap_speed, adj_delay, aggression_level);
+  } catch (std::runtime_error&) {
+    return {};
+  }
 }
 
 MultiState GetStateAllNextPieces(
