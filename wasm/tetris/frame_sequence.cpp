@@ -493,9 +493,9 @@ std::pair<size_t, FrameSequence> GetBestAdj(const std::vector<AdjInfor>& infor, 
       case BestAdjMode::kAdjProb: val = {adj_prob, (float)tap_mx, weight, pre_taps}; break;
       default: unreachable();
     }
-    if (val < mn) mn = val, index = infor[i].index;
+    if (val < mn) mn = val, index = i;
   }
-  return {index, infor[index].seq};
+  return {infor[index].index, infor[index].seq};
 }
 
 std::pair<size_t, FrameSequence> GetBestAdj(

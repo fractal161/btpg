@@ -43,7 +43,8 @@ export class Analysis {
         const target = e.target as HTMLTableCellElement;
         if (target.getAttribute('data-x') === null) return;
         const piece = parseInt(target.getAttribute('data-piece')!);
-        this.preview.placePiece(piece, getPosition(target));
+        const next = target.getAttribute('data-next');
+        this.preview.placePiece(piece, getPosition(target), next !== null ? parseInt(next) : undefined);
     }
 
     constructor(
@@ -71,6 +72,7 @@ export class Analysis {
             prob.classList.add('cell-probability');
             const placement = document.createElement('td');
             placement.classList.add('cell-placement');
+            placement.setAttribute('data-next', i.toString());
             placement.addEventListener('mouseenter', this.mouseEnterHandler.bind(this));
             placement.addEventListener('mouseleave', this.mouseLeaveHandler.bind(this));
             placement.addEventListener('click', this.clickPlaceHandler.bind(this));

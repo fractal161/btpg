@@ -131,6 +131,36 @@ td.cell-score {
   @apply px-1 bg-emerald-900;
 }
 
+@media (prefers-color-scheme: light) {
+  td.cell-hover-mode {
+    @apply px-1 bg-gray-300;
+  }
+  td.cell-placement {
+    @apply px-1 bg-cyan-400;
+  }
+  td.cell-probability {
+    @apply px-1 bg-red-300;
+  }
+  td.cell-piece {
+    @apply px-1 bg-yellow-200;
+  }
+  tr:nth-child(1) > td.cell-rank {
+    @apply px-1 text-black bg-yellow-300;
+  }
+  tr:nth-child(2) > td.cell-rank {
+    @apply px-1 text-black bg-gray-300;
+  }
+  tr:nth-child(3) > td.cell-rank {
+    @apply px-1 text-white bg-orange-800;
+  }
+  td.cell-rank {
+    @apply px-1 bg-gray-400;
+  }
+  td.cell-score {
+    @apply px-1 bg-emerald-400;
+  }
+}
+
 /* game field */
 .board {
   border-spacing: 0px;

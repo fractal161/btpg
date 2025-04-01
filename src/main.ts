@@ -9,34 +9,31 @@ import { TetrisState } from './tetris';
 const state = new TetrisState();
 const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
 const preview = new TetrisPreview(board, state);
-const parameters = new Parameters(
-    document.getElementById('game-param-config')! as HTMLDivElement,
-    document.getElementById('model-param-config')! as HTMLDivElement,
-    preview,
-);
+const parameters = new Parameters(preview);
 const analysis = new Analysis(state, preview);
 const evalButton = document.getElementById('eval') as HTMLButtonElement;
 const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
 let model: ExampleModel | undefined = undefined;
-
-const Sleep = async (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-};
+let evaluating: boolean = false;
 
 const evaluate = async () => {
-    if (model === undefined) return;
+    if (model === undefined || evaluating) return;
+    evaluating = true;
+    const beforePaint = () => new Promise(requestAnimationFrame);
     try {
+        await beforePaint();
         evalButton.disabled = true;
         loadingDiv.classList.remove('hidden');
-        await Sleep(1); // make UI change visible
+        await beforePaint();
         const result = await model.run(state, parameters);
-        await Sleep(1); // prevent double-click
+        await beforePaint();
         analysis.displayResult(result);
     } catch (e) {
         console.error(e);
     } finally {
         evalButton.disabled = false;
         loadingDiv.classList.add('hidden');
+        evaluating = false;
     }
 };
 
@@ -60,11 +57,16 @@ const main = () => {
     evalButton.disabled = true;
     loadingDiv.classList.remove('hidden');
 
-    preview.onChange = (state, isRelease, lineIncrement) => {
+    preview.onChange = (state, isRelease, placementInfor) => {
         analysis.hideAll();
-        if (lineIncrement !== undefined) {
-            parameters.generateRandomPiece();
-            parameters.addLines(lineIncrement);
+        if (placementInfor !== undefined) {
+            if (placementInfor.piece !== undefined) {
+                parameters.setPiece(placementInfor.piece);
+            } else {
+                parameters.generateRandomPiece();
+            }
+            parameters.addLines(placementInfor.lineIncrement);
+            if (parameters.autoEval) evaluate();
         }
         if (!isRelease) return;
         const count = state.board.count();

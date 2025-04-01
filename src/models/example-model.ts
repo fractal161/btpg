@@ -66,7 +66,7 @@ export class ExampleModel implements Model {
         };
 
         const startTime = performance.now();
-        console.log(tetris.board.toString(false, true, true));
+        // console.log(tetris.board.toString(false, true, true));
         const state_pair = module.GetState(
             tetris.board,
             params.piece, // current piece
@@ -93,7 +93,6 @@ export class ExampleModel implements Model {
         const pi_rank = results.pi_rank.data;
         const v = results.v.data;
         const best = new Placement(Number(pi_rank[0]));
-        console.log(v);
 
         const move_mode = state_pair.move_map[best.r][best.x][best.y];
         const result: Record<string, any> = {query: query, eval: Array.from(v)};
@@ -147,7 +146,7 @@ export class ExampleModel implements Model {
         const finishTime = performance.now();
         const elapsedTime = finishTime - startTime;
         result.elapsed_time = elapsedTime;
-        console.log(JSON.stringify(result));
+        // console.log(JSON.stringify(result));
         return result;
     };
 }

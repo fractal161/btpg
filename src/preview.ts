@@ -26,7 +26,7 @@ const BLOCK_OFFSETS = [
 
 export class TetrisPreview {
     public drawMode: 'cell' | 'erase' | 'column' = 'cell';
-    public onChange: (state: TetrisState, isRelease: Boolean, lineIncrement: number | undefined) => void = () => {};
+    public onChange: (state: TetrisState, isRelease: Boolean, placementInfor?: Record<string, any>) => void = () => {};
     private drawing: boolean = false;
     private cells: HTMLTableCellElement[][] = [];
     private cursor: { x: number; y: number } | undefined = undefined;
@@ -222,7 +222,7 @@ export class TetrisPreview {
         }
     }
 
-    public placePiece(piece: number, pos: Position) {
+    public placePiece(piece: number, pos: Position, next?: number) {
         const block = BLOCK_OFFSETS[piece][pos.r];
         for (let i = 0; i < block.length; i++) {
             const x = pos.x + block[i][0];
@@ -249,7 +249,7 @@ export class TetrisPreview {
             src--;
             dst--;
         }
-        this.onChange(this.tetris, false, clearedLines.length);
+        this.onChange(this.tetris, false, {lineIncrement: clearedLines.length, piece: next});
     }
 
     public keyDown(e: KeyboardEvent): void {

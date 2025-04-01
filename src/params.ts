@@ -47,6 +47,37 @@ class Select<T> {
     }
 }
 
+class Checkbox {
+    private checkbox: HTMLInputElement;
+    private _wrapper: HTMLDivElement;
+    get wrapper(): HTMLDivElement {
+        return this._wrapper;
+    }
+    get element(): HTMLInputElement {
+        return this.checkbox;
+    }
+    get value(): boolean {
+        return this.checkbox.checked;
+    }
+    set value(v: boolean) {
+        this.checkbox.checked = v;
+    }
+
+    constructor(id: string, labelText: string) {
+        this.checkbox = document.createElement('input');
+        this.checkbox.type = 'checkbox';
+        this.checkbox.id = id;
+        const label = document.createElement('label');
+        label.textContent = labelText;
+        label.htmlFor = id;
+        const div = document.createElement('div');
+        div.classList.add('field');
+        div.appendChild(label);
+        div.appendChild(this.checkbox);
+        this._wrapper = div;
+    }
+}
+
 function createNumberSelector(
     id: string,
     min: number,
@@ -84,6 +115,7 @@ export class Parameters {
     private hzSelect: Select<TapSpeed>;
     private reactionSelect: Select<number>;
     private aggressionSelect: Select<number>;
+    private autoEvalCheckbox: Checkbox;
     get piece(): number {
         return this.pieceSelect.value;
     }
@@ -98,6 +130,9 @@ export class Parameters {
     }
     get aggression(): number {
         return this.aggressionSelect.value;
+    }
+    get autoEval(): boolean {
+        return this.autoEvalCheckbox.value;
     }
 
     private setLines(value: number, checkParity: Boolean = true) {
@@ -129,10 +164,12 @@ export class Parameters {
     }
 
     constructor(
-        private gameConfig: HTMLDivElement,
-        private modelConfig: HTMLDivElement,
         private preview: TetrisPreview,
     ) {
+        const gameConfig = document.getElementById('game-param-config')! as HTMLDivElement;
+        const modelConfig = document.getElementById('model-param-config')! as HTMLDivElement;
+        const websiteConfig = document.getElementById('website-config')! as HTMLDivElement;
+
         /// Game config
         this.pieceSelect = new Select(
             'current-piece-select',
@@ -155,10 +192,11 @@ export class Parameters {
         const linesField = wrapSelectInField(this.linesInput, 'Lines:');
         this.lines = 0;
 
-        this.gameConfig.appendChild(pieceField);
-        this.gameConfig.appendChild(lvlField);
-        this.gameConfig.appendChild(linesField);
+        gameConfig.appendChild(pieceField);
+        gameConfig.appendChild(lvlField);
+        gameConfig.appendChild(linesField);
 
+        /// Model config
         this.lvlSelect.onchange = (_: Event, level: number) => {
             if (level == 18) {
                 this.lines = 0;
@@ -210,10 +248,13 @@ export class Parameters {
             2,
         );
         const aggroField = wrapSelectInField(this.aggressionSelect.element, 'Aggression:');
-        
-        this.modelConfig.appendChild(hzField);
-        this.modelConfig.appendChild(reactionField);
-        this.modelConfig.appendChild(aggroField);
+
+        modelConfig.appendChild(hzField);
+        modelConfig.appendChild(reactionField);
+        modelConfig.appendChild(aggroField);
+
+        this.autoEvalCheckbox = new Checkbox('auto-eval', 'Auto evaluate:');
+        websiteConfig.appendChild(this.autoEvalCheckbox.wrapper);
     }
 
     public setPiece(piece: number) {
