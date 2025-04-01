@@ -235,7 +235,7 @@ export class TetrisPreview {
         let src = 19;
         let dst = 19;
         let i = clearedLines.length - 1;
-        while (src >= 0) {
+        for (; src >= 0; src--, dst--) {
             while (i >= 0 && clearedLines[i] === src) {
                 i--;
                 src--;
@@ -246,8 +246,11 @@ export class TetrisPreview {
                     this.cells[dst][j].classList = this.cells[src][j].classList.toString();
                 }
             }
-            src--;
-            dst--;
+        }
+        for (; dst >= 0; dst--) {
+            for (let j = 0; j < BOARD_WIDTH; j++) {
+                this.cells[dst][j].classList = 'cell';
+            }
         }
         this.onChange(this.tetris, false, {lineIncrement: clearedLines.length, piece: next});
     }
