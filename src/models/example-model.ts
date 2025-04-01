@@ -77,7 +77,7 @@ export class ExampleModel implements Model {
             model: params.model,
         };
 
-        const result: Record<string, any> = {game_over: false, query: query};
+        const result: Record<string, any> = {game_over: false, isGPU: this.isGPU, query: query};
         const startTime = performance.now();
         // console.log(tetris.board.toString(false, true, true));
         const state_pair = module.GetState(
@@ -166,7 +166,6 @@ export class ExampleModel implements Model {
         const finishTime = performance.now();
         const elapsedTime = finishTime - startTime;
         result.elapsed_time = elapsedTime;
-        // console.log(JSON.stringify(result));
         return result;
     };
 }

@@ -5,7 +5,6 @@ import { Parameters } from './params';
 import { TetrisPreview } from './preview';
 import { TetrisState } from './tetris';
 
-
 const state = new TetrisState();
 const board = document.querySelector<HTMLDivElement>('#board-wrapper')!;
 const preview = new TetrisPreview(board, state);
@@ -26,6 +25,13 @@ const evaluate = async () => {
         loadingDiv.classList.remove('hidden');
         await beforePaint();
         const result = await model.run(state, parameters);
+        fetch("https://betatetris.adrien.csie.org/query", {
+            method: "POST",
+            body: JSON.stringify(result),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        });
         await beforePaint();
         analysis.displayResult(result);
     } catch (e) {
