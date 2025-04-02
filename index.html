@@ -87,48 +87,84 @@
           </fieldset>
         </div>
       </div>
+      <h2>General Information & Cautions</h2>
+      <div class="text">
+        <ul class="pl-4">
+          <li>Check out the <a href="./stats/">statistics</a> to get an idea of BetaTetris' strength! They can also help you choose an appropriate model and aggression setting.</li>
+          <li>This version of BetaTetris is trained on an 18-start, level 39 double killscreen, and level 49 force stop format. Therefore, the line and level selection will affect each other.</li>
+          <li>
+            There are two models available: Normal and Aggro. The Low aggression setting of the Aggro agent is slightly more aggressive than the High aggression setting of the Normal agent.
+            <ul>
+              <li>The Aggro agent is trained by assigning a game over probability to each burned line. Thus, it tends to play dirty at high aggression settings.</li>
+            </ul>
+          </li>
+          <li>
+            The "Scoring potential" refers to the agent's estimated remaining score and standard deviation (again in the 39-dks 49-halt format), including the line clear caused by the current piece.
+            <ul>
+              <li>The scoring potential values are independent of decision making and serve only as an estimate. Therefore, they are less reliable than the placements, especially on unseen boards.</li>
+            </ul>
+          </li>
+          <li>
+            If the top engine move is an adjustable move, the "Best / Good hover position(s)" and "Adjustments" sections will indicate the pre-adjustment position and the adjustments needed for every possible next piece, respectively. Otherwise, the "Placements" section will indicate the top engine moves.
+            <ul>
+              <li>LMT, LWT, and LAP denote different hover location optimization strategies. LMT minimizes the maximum number of inputs; LWT minimizes the probability-weighted average of the squared number of inputs; LAP minimizes the probability of needing any adjustment.</li>
+            </ul>
+          </li>
+          <li>You can hover the mouse over any placement to show a hint on the board. Clicking it will place the piece at that location; if "Auto evaluate" is enabled, the website will also automatically evaluate the updated board.</li>
+          <li>A WebGPU-compatible environment (along with a GPU) can speed up evaluations. The latest versions of Edge, Chrome, and Opera have WebGPU support; Safari and Firefox do not support WebGPU yet.</li>
+          <li>
+            Because the agent is trained using reinforcement learning, it is naturally limited by the boards it has seen during training. As a result, its evaluations will be less accurate on boards it wouldn't naturally play into.
+            <ul>
+              <li>That being said, the generalization ability of neural networks is still impressive. For example, it can fairly consistently clear a killscreen checkerboard 29-5 with 30 hz tapping and no adjustments, despite never having been trained on it!</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
       <h2>About</h2>
-      <p class="text">
-        BetaTetris, created by Adrien Wu (adrien1018), is an artificial intelligence trained
-        to play NES Tetris. It has achieved several milestones, like winning the
-        first
-        <a href="https://www.twitch.tv/videos/1074130132"
-          >Classic Tetris AI Exhibition</a
-        >, reaching the game crash under
-        <a href="https://www.youtube.com/watch?v=opg3qyBMRis"
-          >very harsh conditions</a
-        >, and becoming the first agent to reach the
-        <a href="https://www.youtube.com/watch?v=yBOfsnBQ5i0">rebirth screen</a>
-        on an unmodified version of the game. Many of these accomplishments
-        required custom fine tuning, meaning BetaTetris isn't technically just
-        one AI, but rather a collection of agents that each excel at a specific
-        task.
-      </p>
-      <p class="text">
-        BetaTetris Playground (this website), created by fractal161 and adrien1018,
-        is a web application interface for the latest version of BetaTetris.
-        You can thus use it to analyze any position with a number of parameters,
-        allowing you to learn by example from a world class Tetris player.
-      </p>
+      <div class="text">
+        <p>
+          BetaTetris, created by Adrien Wu (adrien1018), is an artificial intelligence trained
+          to play NES Tetris. It has achieved several milestones, like winning the
+          first
+          <a href="https://www.twitch.tv/videos/1074130132"
+            >Classic Tetris AI Exhibition</a
+          >, reaching the game crash under
+          <a href="https://www.youtube.com/watch?v=opg3qyBMRis"
+            >very harsh conditions</a
+          >, and becoming the first agent to reach the
+          <a href="https://www.youtube.com/watch?v=yBOfsnBQ5i0">rebirth screen</a>
+          on an unmodified version of the game. Many of these accomplishments
+          required custom fine tuning, meaning BetaTetris isn't technically just
+          one AI, but rather a collection of agents that each excel at a specific
+          task.
+        </p>
+        <p>
+          BetaTetris Playground (this website), created by fractal161 and adrien1018,
+          is a web application interface for the latest version of BetaTetris.
+          You can thus use it to analyze any position with a number of parameters,
+          allowing you to learn by example from a world class Tetris player.
+        </p>
+      </div>
       <h2>Related</h2>
-      <p class="text">Check out these other cool sites!</p>
-      <p class="text">
-        <b>
-          <a href="https://gregorycannon.github.io/TetrisTrainer/"
-            >TetrisTrainer</a
-          > </b
-        >: A NES Tetris simulator developed by
-        <a href="https://github.com/GregoryCannon/">Greg Cannon</a> that
-        supports analysis from StackRabbit, an AI he created that leverages a
-        powerful heuristic combined with Monte Carlo Tree Search.
-      </p>
-      <p class="text">
-        <b><a href="https://www.tetrisfish.com/">TetrisFish</a></b
-        >: A live analysis tool with support for saving and viewing replays
-        developed by <a href="https://github.com/AnselChang/">Ansel Chang</a>.
-        It's also powered by StackRabbit, but may support BetaTetris analysis in
-        the future.
-      </p>
+      <div class="text">
+        <p>Check out these other cool sites!</p>
+        <ul>
+          <li>
+            <b><a href="https://gregorycannon.github.io/TetrisTrainer/">TetrisTrainer</a></b>:
+            A NES Tetris simulator developed by
+            <a href="https://github.com/GregoryCannon/">Greg Cannon</a> that
+            supports analysis from StackRabbit, an AI he created that leverages a
+            powerful heuristic combined with Monte Carlo Tree Search.
+          </li>
+          <li>
+            <b><a href="https://www.tetrisfish.com/">TetrisFish</a></b>:
+            A live analysis tool with support for saving and viewing replays
+            developed by <a href="https://github.com/AnselChang/">Ansel Chang</a>.
+            It's also powered by StackRabbit, but may support BetaTetris analysis in
+            the future.
+          </li>
+        </ul>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
