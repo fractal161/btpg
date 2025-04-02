@@ -110,12 +110,19 @@
               <li>LMT, LWT, and LAP denote different hover location optimization strategies. LMT minimizes the maximum number of inputs; LWT minimizes the probability-weighted average of the squared number of inputs; LAP minimizes the probability of needing any adjustment.</li>
             </ul>
           </li>
+          <li>BetaTetris agent uses an actor-critic algorithm, which means it outputs a move distribution and plays according to the move output (rather than using the evaluation function like StackRabbit). For moves with no adjustments, the "Placement" section shows the probabilities. However, for moves where adjustments are possible, only the top move is shown since it is really hard to define a "rank" of moves in this context.</li>
           <li>You can hover the mouse over any placement to show a hint on the board. Clicking it will place the piece at that location; if "Auto evaluate" is enabled, the website will also automatically evaluate the updated board.</li>
           <li>A WebGPU-compatible environment (along with a GPU) can speed up evaluations. The latest versions of Edge, Chrome, and Opera have WebGPU support; Safari and Firefox do not support WebGPU yet.</li>
           <li>
             Because the agent is trained using reinforcement learning, it is naturally limited by the boards it has seen during training. As a result, its evaluations will be less accurate on boards it wouldn't naturally play into.
             <ul>
               <li>That being said, the generalization ability of neural networks is still impressive. For example, it can fairly consistently clear a killscreen checkerboard 29-5 with 30 hz tapping and no adjustments, despite never having been trained on it!</li>
+            </ul>
+          </li>
+          <li>
+            Due to the nature of neural network (and the weirdness of floating point arithmetic), some of the evaluation results may differ on different computers (or sometimes even different runs on the same environment). However this does not affect the strength at all - the difference only happen when there are multiple moves that has very similar output probability.
+            <ul>
+              <li>Due to the same reason, you may not able to exactly reproduce some of the games in the raw game data in <a href="./stats/">statistics</a>, but the statistics will still be similar.</li>
             </ul>
           </li>
         </ul>
