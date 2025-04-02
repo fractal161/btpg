@@ -1,9 +1,4 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-
-// see also advanced usage of importing ONNX Runtime Web:
-// https://github.com/microsoft/onnxruntime-inference-examples/tree/main/js/importing_onnxruntime-web
-
+// @ts-ignore
 import { InferenceSession, Tensor, env } from 'onnxruntime-web/all';
 import onnxNormal from '../../agents/model-normal.onnx';
 import onnxAggro from '../../agents/model-aggro.onnx';
@@ -32,23 +27,23 @@ function createONNXTensor(nestedArray: Array<any>, dataType = 'float32') {
     return new Tensor(dataType as any, flattenedArray, shape);
 }
 
-export class ExampleModel implements Model {
+export class NNModel implements Model {
     private constructor(private sessions: Array<InferenceSession>, private _isGPU: Boolean) {}
 
     public get isGPU() {
         return this._isGPU;
     }
 
-    public static create = async (): Promise<ExampleModel> => {
+    public static create = async (): Promise<NNModel> => {
         try {
             const session0 = await InferenceSession.create(onnxNormal, {executionProviders: ['webgpu']});
             const session1 = await InferenceSession.create(onnxAggro, {executionProviders: ['webgpu']});
-            return new ExampleModel([session0, session1], true);
+            return new NNModel([session0, session1], true);
         } catch (e) {}
         try {
             const session0 = await InferenceSession.create(onnxNormal, {executionProviders: ['wasm']});
             const session1 = await InferenceSession.create(onnxAggro, {executionProviders: ['wasm']});
-            return new ExampleModel([session0, session1], false);
+            return new NNModel([session0, session1], false);
         } catch (e) {
             console.error('Cannot initialize model');
             throw e;

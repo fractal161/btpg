@@ -1,4 +1,4 @@
-import { Placement, TetrisState } from './tetris';
+import { TetrisState } from './tetris';
 import { Parameters } from './params';
 
 // generic class for betatetris models

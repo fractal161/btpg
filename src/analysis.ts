@@ -1,6 +1,6 @@
-import { Position, TapSpeed } from '../wasm/tetris';
+import { Position } from '../wasm/tetris';
 import { TetrisPreview } from './preview';
-import { module, PIECE_NAMES, TRANSITION_PROBS, TetrisState } from './tetris';
+import { PIECE_NAMES, TRANSITION_PROBS, TetrisState } from './tetris';
 
 function scoreText(avg: number, dev: number) {
     const avgInt = Math.round(avg * 100);

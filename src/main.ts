@@ -1,6 +1,6 @@
 import '../styles/style.css';
 import { Analysis } from './analysis';
-import { ExampleModel } from './models/example-model';
+import { NNModel } from './models/nn-model';
 import { Parameters } from './params';
 import { ChangeMode, TetrisPreview } from './preview';
 import { TetrisState } from './tetris';
@@ -13,7 +13,7 @@ const analysis = new Analysis(state, preview);
 const evalButton = document.getElementById('eval') as HTMLButtonElement;
 const undoButton = document.getElementById('undo') as HTMLButtonElement;
 const loadingDiv = document.getElementById('loading')! as HTMLDivElement;
-let model: ExampleModel | undefined = undefined;
+let model: NNModel | undefined = undefined;
 let evaluating: boolean = false;
 
 const evaluate = async () => {
@@ -47,7 +47,7 @@ const evaluate = async () => {
 const initModel = async () => {
     const loadingText = document.getElementById('loading-text')! as HTMLSpanElement;
 
-    model = await ExampleModel.create();
+    model = await NNModel.create();
     if (!model.isGPU) {
         document.getElementById('message-no-webgpu')!.classList.remove('hidden');
     }

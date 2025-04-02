@@ -7,7 +7,7 @@ export class Select<T> {
     get value(): T {
         return this._value;
     }
-    public onchange: (e: Event, v: T) => void = (e, v) => {};
+    public onchange: (e: Event, v: T) => void = () => {};
 
     set selectedIndex(i: number) {
         this.select.selectedIndex = i;
