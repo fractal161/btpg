@@ -200,100 +200,100 @@ td.cell-score {
 .board .block {
   width: 21px;
   height: 21px;
-  background-image: url(./assets/cells/0-1.svg);
+  background-image: url(/assets/cells/0-1.svg);
   background-repeat: no-repeat;
   margin: auto;
   opacity: 0;
 }
 .board.level-0 .block {
-  background-image: url(./assets/cells/0-1.svg);
+  background-image: url(/assets/cells/0-1.svg);
 }
 .board.level-0 .cell.block-2 > .block {
-  background-image: url(./assets/cells/0-2.svg);
+  background-image: url(/assets/cells/0-2.svg);
 }
 .board.level-0 .cell.block-3 > .block {
-  background-image: url(./assets/cells/0-3.svg);
+  background-image: url(/assets/cells/0-3.svg);
 }
 .board.level-1 .block {
-  background-image: url(./assets/cells/1-1.svg);
+  background-image: url(/assets/cells/1-1.svg);
 }
 .board.level-1 .cell.block-2 > .block {
-  background-image: url(./assets/cells/1-2.svg);
+  background-image: url(/assets/cells/1-2.svg);
 }
 .board.level-1 .cell.block-3 > .block {
-  background-image: url(./assets/cells/1-3.svg);
+  background-image: url(/assets/cells/1-3.svg);
 }
 .board.level-2 .block {
-  background-image: url(./assets/cells/2-1.svg);
+  background-image: url(/assets/cells/2-1.svg);
 }
 .board.level-2 .cell.block-2 > .block {
-  background-image: url(./assets/cells/2-2.svg);
+  background-image: url(/assets/cells/2-2.svg);
 }
 .board.level-2 .cell.block-3 > .block {
-  background-image: url(./assets/cells/2-3.svg);
+  background-image: url(/assets/cells/2-3.svg);
 }
 .board.level-3 .block {
-  background-image: url(./assets/cells/3-1.svg);
+  background-image: url(/assets/cells/3-1.svg);
 }
 .board.level-3 .cell.block-2 > .block {
-  background-image: url(./assets/cells/3-2.svg);
+  background-image: url(/assets/cells/3-2.svg);
 }
 .board.level-3 .cell.block-3 > .block {
-  background-image: url(./assets/cells/3-3.svg);
+  background-image: url(/assets/cells/3-3.svg);
 }
 .board.level-4 .block {
-  background-image: url(./assets/cells/4-1.svg);
+  background-image: url(/assets/cells/4-1.svg);
 }
 .board.level-4 .cell.block-2 > .block {
-  background-image: url(./assets/cells/4-2.svg);
+  background-image: url(/assets/cells/4-2.svg);
 }
 .board.level-4 .cell.block-3 > .block {
-  background-image: url(./assets/cells/4-3.svg);
+  background-image: url(/assets/cells/4-3.svg);
 }
 .board.level-5 .block {
-  background-image: url(./assets/cells/5-1.svg);
+  background-image: url(/assets/cells/5-1.svg);
 }
 .board.level-5 .cell.block-2 > .block {
-  background-image: url(./assets/cells/5-2.svg);
+  background-image: url(/assets/cells/5-2.svg);
 }
 .board.level-5 .cell.block-3 > .block {
-  background-image: url(./assets/cells/5-3.svg);
+  background-image: url(/assets/cells/5-3.svg);
 }
 .board.level-6 .block {
-  background-image: url(./assets/cells/6-1.svg);
+  background-image: url(/assets/cells/6-1.svg);
 }
 .board.level-6 .cell.block-2 > .block {
-  background-image: url(./assets/cells/6-2.svg);
+  background-image: url(/assets/cells/6-2.svg);
 }
 .board.level-6 .cell.block-3 > .block {
-  background-image: url(./assets/cells/6-3.svg);
+  background-image: url(/assets/cells/6-3.svg);
 }
 .board.level-7 .block {
-  background-image: url(./assets/cells/7-1.svg);
+  background-image: url(/assets/cells/7-1.svg);
 }
 .board.level-7 .cell.block-2 > .block {
-  background-image: url(./assets/cells/7-2.svg);
+  background-image: url(/assets/cells/7-2.svg);
 }
 .board.level-7 .cell.block-3 > .block {
-  background-image: url(./assets/cells/7-3.svg);
+  background-image: url(/assets/cells/7-3.svg);
 }
 .board.level-8 .block {
-  background-image: url(./assets/cells/8-1.svg);
+  background-image: url(/assets/cells/8-1.svg);
 }
 .board.level-8 .cell.block-2 > .block {
-  background-image: url(./assets/cells/8-2.svg);
+  background-image: url(/assets/cells/8-2.svg);
 }
 .board.level-8 .cell.block-3 > .block {
-  background-image: url(./assets/cells/8-3.svg);
+  background-image: url(/assets/cells/8-3.svg);
 }
 .board.level-9 .block {
-  background-image: url(./assets/cells/9-1.svg);
+  background-image: url(/assets/cells/9-1.svg);
 }
 .board.level-9 .cell.block-2 > .block {
-  background-image: url(./assets/cells/9-2.svg);
+  background-image: url(/assets/cells/9-2.svg);
 }
 .board.level-9 .cell.block-3 > .block {
-  background-image: url(./assets/cells/9-3.svg);
+  background-image: url(/assets/cells/9-3.svg);
 }
 
 .board .cell.filled > .block {
