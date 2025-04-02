@@ -20,11 +20,73 @@
       href="../assets/favicon-16x16.png"
     />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" href="/assets/stats.json" as="fetch">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stats | BetaTetris Playground</title>
+    <title>Statistics | BetaTetris Playground</title>
   </head>
   <body class="m-0 flex min-w-80">
+    <div id="app" class="max-w-7xl mb-12 text-center mx-auto">
+      <h1>Statistics</h1>
+      <h2>Overview</h2>
+      <div id="params-select" class="flex flex-row justify-center gap-4 mb-2"></div>
+      <table class="stats">
+        <thead>
+          <tr>
+            <th colspan="2">Model</th>
+            <th colspan="3">Normal</th>
+            <th colspan="3">Aggro</th>
+          </tr>
+          <tr>
+            <th colspan="2">Aggression</th>
+            <th>Low</th>
+            <th>Medium</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Medium</th>
+            <th>High</th>
+          </tr>
+        </thead>
+        <tbody id="stats-table"></tbody>
+      </table>
+      <h2>Raw Data Download</h2>
+      <div class="text">
+        Below are the raw data files of both agents, evaluated on the same 5001 TetrisGYMv5 seeds:
+        <ul>
+          <li>
+            <a href="https://share.adrien.csie.org/betatetris/short-stats.zip">All agents: Short-form data</a> (58 MB)
+          </li>
+          <li>
+            <a href="https://share.adrien.csie.org/betatetris/normal-full-stats.zip">Normal agent: Full data</a> (772 MB)
+          </li>
+          <li>
+            <a href="https://share.adrien.csie.org/betatetris/aggro-full-stats.zip">Aggro agent: Full data</a> (506 MB)
+          </li>
+        </ul>
+        <p>All data are in CSV format. The filenames follow the format <code>[tap speed]-[adjustment delay in frames]-[aggression].csv</code>.</p>
+        <ul>
+          <li>Column 1 is the TetrisGYMv5 seed, converted to decimal.</li>
+          <li>Columns 2-4 are the transition scores for levels 19, 29, and 39.</li>
+          <li>Column 5 is the final score.</li>
+          <li>Column 6 (or 7 in full <code>spec-</code> files) is the number of lines cleared.</li>
+          <li>Column 7 (or 8 in full <code>spec-</code> files) is the game log:
+            <ul>
+              <li>In the short-form data files, it consists of a colon followed by the line clear type of every line clear in the game.</li>
+              <li>
+                In the full data files, it lists every piece's placement in the game.
+                Each placement is denoted by 4 characters:
+                the first three characters indicate the coordinates (rotation, row, column) of the locked position,
+                and the last character represents the line clear type.
+                Rows are numbered from top to bottom as 0-9, a-j;
+                columns are numbered from left to right as 0-9.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p>In the data for the normal agent, there are 4 files starting with <code>spec-</code>. These contain statistics of the agent being forced to play indefinitely at a specific level speed (killscreen or double killscreen) on the lowest aggression setting to test its survival limits. For these files, the score columns contain incorrect data (due to the fixed level) and should therefore be ignored.</p>      
+      </div>
+    </div>
 
+    <script type="module" src="/src/stats.ts"></script>
   </body>
 </html>

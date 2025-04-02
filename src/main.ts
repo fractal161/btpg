@@ -111,6 +111,7 @@ const main = () => {
         }
         undoButton.disabled = preview.historySize == 1;
     };
+    preview.onChange(state, ChangeMode.LOAD);
     initModel();
 };
 main();

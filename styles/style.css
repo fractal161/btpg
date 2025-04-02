@@ -28,6 +28,10 @@ fieldset {
   border: 1px rgba(255, 255, 255, 0.87) solid;
 }
 
+code {
+  @apply bg-gray-700 text-red-300;
+}
+
 .field {
   display: flex;
   justify-content: space-between;
@@ -97,6 +101,17 @@ button:focus-visible {
     border: 4px solid #09a48b;
     border-top: 4px solid rgba(0, 0, 0, 0);
   }
+}
+
+/* stats */
+table.stats {
+  @apply mx-auto border-collapse;
+}
+table.stats td, table.stats th {
+  @apply border-1 border-gray-200 px-2 py-0.5;
+}
+table.stats td.stat-cell {
+  @apply text-right;
 }
 
 /* analysis */

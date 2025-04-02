@@ -1,133 +1,7 @@
 import { TapSpeed } from '../wasm/tetris';
 import { TetrisPreview } from './preview';
 import { module, PIECE_NAMES, TRANSITION_PROBS } from './tetris';
-
-class Select<T> {
-    private select: HTMLSelectElement;
-    get element(): HTMLSelectElement {
-        return this.select;
-    }
-    private _value: T;
-    get value(): T {
-        return this._value;
-    }
-    public onchange: (e: Event, v: T) => void = (e, v) => {};
-
-    set selectedIndex(i: number) {
-        this.select.selectedIndex = i;
-        this._value = this.keys[i];
-    }
-    get selectedIndex(): number {
-        return this.select.selectedIndex;
-    }
-
-    public saveValue() {
-        localStorage.setItem('field-' + this.select.id, this.select.value);
-    }
-
-    constructor(
-        id: string,
-        private keys: Array<T>,
-        texts: Array<string>,
-        defaultOption: number = 0,
-    ) {
-        this.select = document.createElement('select');
-        this.select.id = id;
-        if (keys.length != texts.length) {
-            throw new Error('keys and texts must have the same length');
-        }
-        for (let i = 0; i < keys.length; i++) {
-            const option = document.createElement('option');
-            option.value = i.toString();
-            option.innerText = texts[i];
-            this.select.appendChild(option);
-        }
-        const savedOption = localStorage.getItem('field-' + id);
-        if (savedOption !== null) {
-            this.select.selectedIndex = parseInt(savedOption);
-        } else {
-            this.select.selectedIndex = defaultOption;
-        }
-        this._value = keys[defaultOption];
-        this.select.addEventListener('change', (e: Event) => {
-            this.saveValue();
-            this._value = keys[this.select.selectedIndex];
-            this.onchange(e, this._value);
-        });
-    }
-}
-
-class Checkbox {
-    private checkbox: HTMLInputElement;
-    private _wrapper: HTMLDivElement;
-    get wrapper(): HTMLDivElement {
-        return this._wrapper;
-    }
-    get element(): HTMLInputElement {
-        return this.checkbox;
-    }
-    get value(): boolean {
-        return this.checkbox.checked;
-    }
-    set value(v: boolean) {
-        this.checkbox.checked = v;
-    }
-
-    constructor(id: string, labelText: string) {
-        this.checkbox = document.createElement('input');
-        this.checkbox.type = 'checkbox';
-        this.checkbox.id = id;
-        this.checkbox.checked = localStorage.getItem('field-' + id) === '1';
-        this.checkbox.addEventListener('change', (_) => {
-            localStorage.setItem('field-' + id, this.checkbox.checked ? '1' : '0');
-        });
-        const label = document.createElement('label');
-        label.textContent = labelText;
-        label.htmlFor = id;
-        const div = document.createElement('div');
-        div.classList.add('field');
-        div.appendChild(label);
-        div.appendChild(this.checkbox);
-        this._wrapper = div;
-    }
-}
-
-function createNumberSelector(
-    id: string,
-    min: number,
-    max: number,
-    step: number = 1,
-    defaultValue: number = 0,
-): HTMLInputElement {
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.id = id;
-    input.min = min.toString();
-    input.max = max.toString();
-    input.step = step.toString();
-    const savedValue = localStorage.getItem('field-' + id);
-    if (savedValue !== null) {
-        input.value = savedValue;
-    } else {
-        input.value = defaultValue.toString();
-    }
-    return input;
-}
-
-function wrapSelectInField(
-    select: HTMLSelectElement | HTMLInputElement,
-    labelText: string,
-): HTMLDivElement {
-    const label = document.createElement('label');
-    label.textContent = labelText;
-    label.htmlFor = select.id;
-    const div = document.createElement('div');
-    div.classList.add('field');
-    div.appendChild(label);
-    div.appendChild(select);
-    return div;
-}
-
+import { Select, Checkbox, wrapSelectInField, createNumberSelector } from './components';
 
 export class Parameters {
     private pieceSelect: Select<number>;
@@ -212,6 +86,7 @@ export class Parameters {
             LEVELS,
             LEVELS.map((lvl) => lvl.toString()),
             0,
+            false,
         );
         const lvlField = wrapSelectInField(this.lvlSelect.element, 'Level speed:');
 
@@ -235,16 +110,15 @@ export class Parameters {
             }
         }
 
-        const lineInput = (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.setLines(parseInt(target.value), false);
+        const lineInput = (_: Event) => {
+            this.setLines(parseInt(this.linesInput.value), false);
         }
-        const lineChange = (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.setLines(parseInt(target.value), true);
+        const lineChange = (_: Event) => {
+            this.setLines(parseInt(this.linesInput.value), true);
         }
         this.linesInput.addEventListener('input', lineInput);
         this.linesInput.addEventListener('change', lineChange);
+        this.setLines(parseInt(this.linesInput.value), true);
 
         /// Model config
         this.modelSelect = new Select(
@@ -260,7 +134,7 @@ export class Parameters {
             [module.TapSpeed.kTap10Hz, module.TapSpeed.kTap12Hz, module.TapSpeed.kTap15Hz,
                 module.TapSpeed.kTap20Hz, module.TapSpeed.kTap24Hz, module.TapSpeed.kTap30Hz,
                 module.TapSpeed.kSlow5],
-            [ '10hz', '12hz', '15hz', '20hz', '24hz', '30hz', 'slow 5 tap'],
+            ['10hz', '12hz', '15hz', '20hz', '24hz', '30hz', 'slow 5 tap'],
             4,
         );
         const hzField = wrapSelectInField(this.hzSelect.element, 'Tap speed:');
