@@ -55,18 +55,6 @@ const initModel = async () => {
     loadingDiv.classList.add('hidden');
     loadingText.innerText = 'Evaluating...';
     evalButton.addEventListener('click', evaluate);
-
-    // preload images
-    const images = document.createElement('div');
-    images.classList.add('hidden');
-    for (let i = 0; i < 10; i++) {
-        for (let j = 1; j <= 3; j++) {
-            const img = document.createElement('img');
-            img.src = `/btpg/assets/cells/${i}-${j}.svg`;
-            images.appendChild(img);
-        }
-    }
-    document.body.appendChild(images);
 };
 
 const main = () => {
