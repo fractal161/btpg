@@ -7,7 +7,7 @@ const SCORE_LABELS = ['Average', 'Stddev'].concat(PERCENTILES.map(p => `p${p/10}
 
 const initAnalysisTable = async () => {
     // load data
-    const response = await fetch("/btpg/assets/stats.json");
+    const response = await fetch("/btpg/stats.json");
     const data = await response.json();
 
     // init fields

@@ -8,6 +8,10 @@ export default defineConfig({
   base: '/btpg/',
   build: {
     rollupOptions: {
+      input: {
+        main: 'index.html',
+        stats: 'stats/index.html',
+      },
       output: {
         manualChunks: {
           onnx: ['onnxruntime-web'],
