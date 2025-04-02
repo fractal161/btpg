@@ -95,7 +95,7 @@ const main = () => {
             evalButton.disabled = true;
         } else {
             errorFull.classList.add('hidden');
-            evalButton.disabled = false;
+            if (changeMode != ChangeMode.LOAD) evalButton.disabled = false;
         }
         undoButton.disabled = preview.historySize == 1;
     };
