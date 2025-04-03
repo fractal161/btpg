@@ -1,6 +1,6 @@
 # btpg
 
-A frontend for using the [BetaTetris](https://github.com/adrien1018/beta-tetris/blob/left-well/README.md) AI in the browser, through the magic of the [ONNX Runtime](https://onnxruntime.ai/).
+A frontend for using the [BetaTetris](https://github.com/BetaTetris/betatetris-tablebase) AI in the browser, through the magic of the [ONNX Runtime](https://onnxruntime.ai/).
 
 ## Setup
 
@@ -12,4 +12,4 @@ To use any of the python scripts, run `pip install -r requirements.txt`. I recom
 
 ## Acknowledgements
 
-Adrien Wu for creating BetaTetris.
+[fractal161](https://github.com/fractal161) for creating this website, and [Adrien Wu](https://github.com/adrien1018) for creating BetaTetris.
